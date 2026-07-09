@@ -10,6 +10,7 @@ import {
   type AgendaProfessional,
   useBookAppointment,
 } from "@/hooks/useAgenda";
+import { useClientOptions } from "@/hooks/useClients";
 import { useProfessionalServices } from "@/hooks/useTeam";
 import { formatBRL, formatMinutes } from "@/lib/format";
 import type { Service } from "@/types/database";
@@ -58,12 +59,14 @@ export function NewAppointmentDialog({
   const [serviceId, setServiceId] = useState("");
   const [date, setDate] = useState(toDateInput(now));
   const [time, setTime] = useState(toTimeInput(now));
+  const [clientSel, setClientSel] = useState(""); // "" | id | "__avulsa__"
   const [clientName, setClientName] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const pid = fixedProfessionalId ?? professionalId;
   const proServices = useProfessionalServices(pid || undefined);
+  const clients = useClientOptions();
 
   // serviços que ESTA profissional faz, com preço/duração dela
   const offered = useMemo<OfferedService[]>(() => {
@@ -89,6 +92,7 @@ export function NewAppointmentDialog({
     setDate(toDateInput(start));
     setTime(toTimeInput(start));
     setServiceId("");
+    setClientSel("");
     setClientName("");
     setNotes("");
     setError(null);
@@ -113,12 +117,15 @@ export function NewAppointmentDialog({
     const [h, min] = time.split(":").map(Number);
     const start = new Date(`${date}T00:00:00`);
     start.setHours(h, min, 0, 0);
+    const isRegistered = clientSel && clientSel !== "__avulsa__";
     try {
       await book.mutateAsync({
         professionalId: pid,
         serviceId,
         scheduledStart: start,
-        clientName: clientName.trim() || undefined,
+        clientRecordId: isRegistered ? clientSel : undefined,
+        clientName:
+          clientSel === "__avulsa__" ? clientName.trim() || undefined : undefined,
         notes: notes.trim() || undefined,
       });
       onClose();
@@ -209,12 +216,34 @@ export function NewAppointmentDialog({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="client">Cliente</Label>
-          <Input
+          <Select
             id="client"
-            placeholder="Nome da cliente (avulsa)"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-          />
+            value={clientSel}
+            onChange={(e) => {
+              setClientSel(e.target.value);
+              if (e.target.value !== "__avulsa__") setClientName("");
+            }}
+          >
+            <option value="">Sem cadastro</option>
+            {(clients.data ?? []).length > 0 && (
+              <optgroup label="Cadastradas">
+                {clients.data!.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.full_name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            <option value="__avulsa__">Avulsa (digitar nome)…</option>
+          </Select>
+          {clientSel === "__avulsa__" && (
+            <Input
+              className="mt-2"
+              placeholder="Nome da cliente"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+            />
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">

@@ -93,6 +93,7 @@ export interface BookInput {
   scheduledStart: Date;
   clientName?: string;
   clientId?: string;
+  clientRecordId?: string;
   notes?: string;
 }
 
@@ -107,11 +108,15 @@ export function useBookAppointment() {
         p_client_id: input.clientId ?? null,
         p_client_name: input.clientName ?? null,
         p_notes: input.notes ?? null,
+        p_client_record_id: input.clientRecordId ?? null,
       });
       if (error) throw error;
       return data as string;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["appointments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["appointments"] });
+      qc.invalidateQueries({ queryKey: ["clients"] });
+    },
   });
 }
 

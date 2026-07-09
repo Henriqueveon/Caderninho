@@ -3,6 +3,7 @@ import {
   Calendar,
   CalendarClock,
   CalendarPlus,
+  Contact,
   History,
   LayoutDashboard,
   Scissors,
@@ -20,6 +21,7 @@ import { AvailabilityEditor } from "@/components/agenda/AvailabilityEditor";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { ClientHome } from "@/pages/app/ClientHome";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
+import { ClientsPage } from "@/pages/admin/ClientsPage";
 import { FinancePage } from "@/pages/admin/FinancePage";
 import { GoalsPage } from "@/pages/admin/GoalsPage";
 import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
@@ -33,6 +35,7 @@ import { ProDashboard } from "@/pages/pro/ProDashboard";
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Início", icon: LayoutDashboard },
   { to: "/admin/agenda", label: "Agenda", icon: Calendar },
+  { to: "/admin/clientes", label: "Clientes", icon: Contact },
   { to: "/admin/financeiro", label: "Financeiro", icon: BarChart3 },
   { to: "/admin/profissionais", label: "Equipe", icon: Users },
   { to: "/admin/servicos", label: "Serviços", icon: Scissors },
@@ -49,6 +52,7 @@ const PRO_NAV: NavItem[] = [
 
 const SECRETARY_NAV: NavItem[] = [
   { to: "/secretaria/agenda", label: "Agenda", icon: Calendar },
+  { to: "/secretaria/clientes", label: "Clientes", icon: Contact },
   { to: "/secretaria/disponibilidade", label: "Horários", icon: CalendarClock },
 ];
 
@@ -93,6 +97,7 @@ export default function App() {
             path="/admin/agenda"
             element={<AgendaPage scope="all" showRevenue />}
           />
+          <Route path="/admin/clientes" element={<ClientsPage />} />
           <Route
             path="/admin/disponibilidade"
             element={<AvailabilityEditor scope="all" />}
@@ -133,6 +138,7 @@ export default function App() {
             path="/secretaria/agenda"
             element={<AgendaPage scope="all" showRevenue={false} />}
           />
+          <Route path="/secretaria/clientes" element={<ClientsPage />} />
           <Route
             path="/secretaria/disponibilidade"
             element={<AvailabilityEditor scope="all" />}
