@@ -15,6 +15,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppShell, type NavItem } from "@/components/shared/AppShell";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
+import { AgendaPage } from "@/components/agenda/AgendaPage";
+import { AvailabilityEditor } from "@/components/agenda/AvailabilityEditor";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { ClientHome } from "@/pages/app/ClientHome";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
@@ -38,6 +40,11 @@ const PRO_NAV: NavItem[] = [
   { to: "/pro/disponibilidade", label: "Horários", icon: CalendarClock },
   { to: "/pro/ganhos", label: "Ganhos", icon: Wallet },
   { to: "/pro/historico", label: "Histórico", icon: History },
+];
+
+const SECRETARY_NAV: NavItem[] = [
+  { to: "/secretaria/agenda", label: "Agenda", icon: Calendar },
+  { to: "/secretaria/disponibilidade", label: "Horários", icon: CalendarClock },
 ];
 
 const CLIENT_NAV: NavItem[] = [
@@ -72,11 +79,19 @@ export default function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/invite/:token" element={<InvitePage />} />
 
-      <Route element={<ProtectedRoute role="owner" />}>
+      {/* GESTORA */}
+      <Route element={<ProtectedRoute roles={["owner"]} />}>
         <Route element={<AppShell items={ADMIN_NAV} />}>
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/agenda" element={<ComingSoon title="Agenda" />} />
+          <Route
+            path="/admin/agenda"
+            element={<AgendaPage scope="all" showRevenue />}
+          />
+          <Route
+            path="/admin/disponibilidade"
+            element={<AvailabilityEditor scope="all" />}
+          />
           <Route path="/admin/atendimentos" element={<ComingSoon title="Atendimentos" />} />
           <Route path="/admin/financeiro" element={<ComingSoon title="Financeiro" />} />
           <Route path="/admin/profissionais" element={<ComingSoon title="Profissionais" />} />
@@ -86,18 +101,41 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute role="professional" />}>
+      {/* PROFISSIONAL */}
+      <Route element={<ProtectedRoute roles={["professional"]} />}>
         <Route element={<AppShell items={PRO_NAV} />}>
           <Route path="/pro" element={<Navigate to="/pro/dashboard" replace />} />
           <Route path="/pro/dashboard" element={<ProDashboard />} />
-          <Route path="/pro/agenda" element={<ComingSoon title="Minha agenda" />} />
-          <Route path="/pro/disponibilidade" element={<ComingSoon title="Disponibilidade" />} />
+          <Route
+            path="/pro/agenda"
+            element={<AgendaPage scope="self" showRevenue={false} />}
+          />
+          <Route
+            path="/pro/disponibilidade"
+            element={<AvailabilityEditor scope="self" />}
+          />
           <Route path="/pro/ganhos" element={<ComingSoon title="Meus ganhos" />} />
           <Route path="/pro/historico" element={<ComingSoon title="Histórico" />} />
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute role="client" />}>
+      {/* SECRETÁRIA — todas as agendas, sem faturamento */}
+      <Route element={<ProtectedRoute roles={["secretary"]} />}>
+        <Route element={<AppShell items={SECRETARY_NAV} />}>
+          <Route path="/secretaria" element={<Navigate to="/secretaria/agenda" replace />} />
+          <Route
+            path="/secretaria/agenda"
+            element={<AgendaPage scope="all" showRevenue={false} />}
+          />
+          <Route
+            path="/secretaria/disponibilidade"
+            element={<AvailabilityEditor scope="all" />}
+          />
+        </Route>
+      </Route>
+
+      {/* CLIENTE */}
+      <Route element={<ProtectedRoute roles={["client"]} />}>
         <Route element={<AppShell items={CLIENT_NAV} />}>
           <Route path="/app" element={<Navigate to="/app/agendar" replace />} />
           <Route path="/app/agendar" element={<ClientHome />} />

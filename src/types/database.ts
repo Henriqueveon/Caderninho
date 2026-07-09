@@ -1,4 +1,4 @@
-export type Role = "owner" | "professional" | "client";
+export type Role = "owner" | "professional" | "secretary" | "client";
 
 export type AppointmentStatus =
   | "scheduled"

@@ -97,6 +97,8 @@ export function homePathFor(role: Profile["role"]): string {
       return "/admin/dashboard";
     case "professional":
       return "/pro/dashboard";
+    case "secretary":
+      return "/secretaria/agenda";
     case "client":
       return "/app/agendar";
   }

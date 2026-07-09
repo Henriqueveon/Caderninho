@@ -4,7 +4,11 @@
 > **Nome do projeto:** Caderninho (o caderninho de anotações do estúdio, agora profissional). Slug técnico: `caderninho` — usar em todo o código, no nome da pasta, do repositório GitHub, do projeto Supabase e do projeto Vercel.
 > **Uso deste documento:** este arquivo é o contexto-mestre do projeto.
 
-> **Estado atual (2026-07-09):** Fase 1 concluída. Projeto Supabase dedicado criado (ref `bsbdzemsbaonaopzqldy`, sa-east-1), migrations + RLS + triggers + seed aplicados, auth com roteamento por role funcionando, libs core (`slots.ts`, `earnings.ts`) com 20 testes unitários. Próximo passo: Fase 2 (agenda interna).
+> **Estado atual (2026-07-09):** Fases 1 e 2 (núcleo da agenda) concluídas. Supabase dedicado (ref `bsbdzemsbaonaopzqldy`), migrations 0001–0005 aplicadas, auth por role, libs core com 20 testes. Agenda interna funcionando: role **secretária** adicionada, RPC `book_appointment` (snapshots server-side + conflito), visões dia/semana/mês com filtro e stats, editor de disponibilidade, fluxo Confirmar→Iniciar→Finalizar→No-show. Backend verificado por role (9 smoke tests). Próximo: Google Calendar (ver `docs/google-calendar.md`, precisa de OAuth), depois Fase 3 (financeiro) e Fase 4 (portal da cliente).
+
+> **Hierarquia de acesso (4 roles):** `owner` vê e faz tudo (todas as agendas + faturamento). `secretary` vê/gerencia **todas as agendas** mas **nenhum faturamento** (earnings/goals/bonuses bloqueados por RLS). `professional` só a própria agenda + o próprio faturamento. `client` agenda a si. Áreas: `/admin` (owner), `/secretaria`, `/pro`, `/app`.
+
+> **Usuários de teste (senha `102030`):** `victoriabatista@esmalteria.vb` (gestora), `ana@esmalteria.vb` e `bruna@esmalteria.vb` (profissionais), `secretaria@esmalteria.vb` (secretária). Criados via insert direto em `auth.users` — preencher os campos de token com '' senão o login dá 500.
 
 ---
 
