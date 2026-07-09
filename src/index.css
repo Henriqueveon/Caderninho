@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 60 17% 98%; /* #FAFAF8 off-white */
+    --foreground: 258 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 258 20% 15%;
+    --primary: 258 90% 66%; /* #8B5CF6 roxo/lavanda */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 291 78% 92%;
+    --secondary-foreground: 291 40% 30%;
+    --muted: 60 10% 94%;
+    --muted-foreground: 258 10% 45%;
+    --accent: 291 78% 83%; /* #F0ABFC rosê */
+    --accent-foreground: 291 40% 25%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 258 15% 90%;
+    --input: 258 15% 88%;
+    --ring: 258 90% 66%;
+    --radius: 1rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .tnums {
+    font-variant-numeric: tabular-nums;
+  }
+}
