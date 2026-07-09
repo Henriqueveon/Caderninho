@@ -1,8 +1,9 @@
 import { type FormEvent, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 
+import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
@@ -35,15 +36,18 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="mb-6 flex flex-col items-center gap-3 text-center">
+        <Logo size={52} withWordmark={false} />
+        <div>
+          <h1 className="text-2xl font-semibold">Caderninho</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Seu caderninho de anotações do estúdio, agora profissional.
+          </p>
+        </div>
+      </div>
       <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <h1 className="text-2xl font-semibold text-primary">Caderninho</h1>
-          <CardTitle className="text-base font-normal text-muted-foreground">
-            Entre na sua conta
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">E-mail</Label>

@@ -1,0 +1,76 @@
+/* =========================================================
+   CADERNINHO — Design tokens (fonte única da verdade)
+   Trocar de tema = mudar só o bloco da cor primária.
+   ========================================================= */
+:root {
+  /* ---- COR PRIMÁRIA (única coisa que muda entre temas) ---- */
+  --primary: #b76e79; /* Rose Gold */
+  --primary-light: #d9a0a9; /* topo do gradiente */
+  --primary-dark: #8e5560; /* base do gradiente */
+  --gradient-primary: linear-gradient(160deg, #d9a0a9 0%, #b76e79 55%, #8e5560 100%);
+  --primary-tint: rgba(183, 110, 121, 0.1); /* fundo suave (hover/seleção) */
+  --primary-glow: rgba(183, 110, 121, 0.18); /* anel de foco */
+
+  /* ---- SUPERFÍCIES (neutras, iguais em todos os temas) ---- */
+  --bg: #fcfaf8; /* fundo principal — creme acetinado */
+  --bg-secondary: #f7efec; /* fundo secundário — nude quente */
+  --card: #fffdfc; /* cards — branco quente */
+
+  /* ---- TEXTO ---- */
+  --text: #2d2a2e; /* carvão (nunca preto puro) */
+  --text-secondary: #8d8785; /* cinza quente */
+
+  /* ---- BORDAS ---- */
+  --border: #ece4e2; /* quase invisível */
+
+  /* ---- FEEDBACK DE ESTADO ---- */
+  --success: #7a8450; /* verde oliva suave (concluído) */
+  --error: #c4715a; /* terracota (erro) */
+  --warning: #c9a46a; /* champagne dourado (aviso) */
+
+  /* ---- SOMBRAS (jamais pretas — sempre quentes e difusas) ---- */
+  --shadow-card: 0 10px 40px rgba(40, 25, 25, 0.08);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 16px 48px rgba(142, 85, 96, 0.14);
+
+  /* ---- RAIOS ---- */
+  --radius-input: 18px;
+  --radius-card: 24px;
+  --radius-modal: 32px;
+  --radius-button: 18px;
+
+  /* ---- ESPAÇAMENTO (generoso) ---- */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+
+  /* ---- TIPOGRAFIA ---- */
+  --font: "Plus Jakarta Sans", "Inter", "Manrope", system-ui, sans-serif;
+  --weight-title: 600;
+  --weight-body: 400;
+  --weight-btn: 500;
+
+  /* ---- MOVIMENTO ---- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur-base: 220ms;
+  --dur-slow: 300ms;
+}
+
+/* ---- MODO ESCURO: identidade própria, não inversão ---- */
+:root[data-theme="dark"] {
+  --bg: #191818;
+  --bg-secondary: #201e1e;
+  --card: #242222;
+  --text: #f5f2f1;
+  --text-secondary: #a39d9b;
+  --border: #322f2f;
+  --primary-tint: rgba(217, 160, 169, 0.14);
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 10px 40px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-float: 0 16px 48px rgba(0, 0, 0, 0.45);
+}

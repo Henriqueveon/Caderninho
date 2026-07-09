@@ -9,7 +9,7 @@ export const Card = forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl bg-card text-card-foreground shadow-sm",
+      "rounded-card bg-card text-card-foreground shadow-card transition-shadow duration-200",
       className,
     )}
     {...props}

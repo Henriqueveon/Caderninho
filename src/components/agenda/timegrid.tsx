@@ -100,7 +100,7 @@ export function DayColumn({
             style={{
               top,
               height,
-              borderLeft: `3px solid ${color ?? "#8B5CF6"}`,
+              borderLeft: `3px solid ${color ?? "var(--primary)"}`,
             }}
             title={`${a.client_name_snapshot ?? ""} · ${a.service?.name ?? ""}`}
           >

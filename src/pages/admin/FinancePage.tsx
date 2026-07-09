@@ -145,11 +145,18 @@ export function FinancePage() {
                     tickFormatter={(v) => `R$${v}`}
                   />
                   <Tooltip
+                    cursor={{ fill: "var(--primary-tint)" }}
                     formatter={(v: number) => [formatBRL(v), "Faturamento"]}
                     labelStyle={{ fontSize: 12 }}
-                    contentStyle={{ borderRadius: 12, fontSize: 12 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      fontSize: 12,
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text)",
+                    }}
                   />
-                  <Bar dataKey="faturamento" fill="#8B5CF6" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="faturamento" fill="var(--primary)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

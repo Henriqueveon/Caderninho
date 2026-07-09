@@ -1,35 +1,36 @@
+@import "./styles/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 60 17% 98%; /* #FAFAF8 off-white */
-    --foreground: 258 20% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 258 20% 15%;
-    --primary: 258 90% 66%; /* #8B5CF6 roxo/lavanda */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 291 78% 92%;
-    --secondary-foreground: 291 40% 30%;
-    --muted: 60 10% 94%;
-    --muted-foreground: 258 10% 45%;
-    --accent: 291 78% 83%; /* #F0ABFC rosê */
-    --accent-foreground: 291 40% 25%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 258 15% 90%;
-    --input: 258 15% 88%;
-    --ring: 258 90% 66%;
-    --radius: 1rem;
-  }
-
   * {
     @apply border-border;
   }
 
+  html {
+    color-scheme: light;
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: var(--weight-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: var(--weight-title);
+    letter-spacing: -0.01em;
   }
 }
 
@@ -37,4 +38,47 @@
   .tnums {
     font-variant-numeric: tabular-nums;
   }
+
+  /* gradiente primário (botões, marca) */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* vidro discreto para overlays */
+  .glass {
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--card) 82%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* granulação acetinada sutil no fundo (microprofundidade) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background:
+    radial-gradient(
+      600px circle at 100% 0%,
+      var(--primary-tint),
+      transparent 45%
+    ),
+    radial-gradient(
+      700px circle at 0% 100%,
+      color-mix(in srgb, var(--primary-light) 12%, transparent),
+      transparent 45%
+    );
+}
+#root {
+  position: relative;
+  z-index: 1;
 }

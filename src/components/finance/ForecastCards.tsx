@@ -19,9 +19,9 @@ export function ForecastCards({
   const pct = (v: number) => `${(v / total) * 100}%`;
 
   const cards = [
-    { label: "Realizado no mês", value: f.realizado, color: "text-emerald-600", bar: "#10B981" },
-    { label: "Já garantido", value: f.agendado, color: "text-violet-600", bar: "#8B5CF6" },
-    { label: "Potencial", value: f.potencial, color: "text-amber-600", bar: "#F59E0B" },
+    { label: "Realizado no mês", value: f.realizado, color: "text-success", bar: "var(--success)" },
+    { label: "Já garantido", value: f.agendado, color: "text-primary", bar: "var(--primary)" },
+    { label: "Potencial", value: f.potencial, color: "text-warning", bar: "var(--warning)" },
   ];
 
   return (
