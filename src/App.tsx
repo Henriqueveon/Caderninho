@@ -20,10 +20,12 @@ import { AvailabilityEditor } from "@/components/agenda/AvailabilityEditor";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { ClientHome } from "@/pages/app/ClientHome";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
+import { FinancePage } from "@/pages/admin/FinancePage";
 import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
 import { InvitePage } from "@/pages/auth/InvitePage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
+import { EarningsPage } from "@/pages/pro/EarningsPage";
 import { ProDashboard } from "@/pages/pro/ProDashboard";
 
 const ADMIN_NAV: NavItem[] = [
@@ -94,7 +96,7 @@ export default function App() {
             element={<AvailabilityEditor scope="all" />}
           />
           <Route path="/admin/atendimentos" element={<ComingSoon title="Atendimentos" />} />
-          <Route path="/admin/financeiro" element={<ComingSoon title="Financeiro" />} />
+          <Route path="/admin/financeiro" element={<FinancePage />} />
           <Route path="/admin/profissionais" element={<ProfessionalsPage />} />
           <Route path="/admin/servicos" element={<ComingSoon title="Serviços" />} />
           <Route path="/admin/historico" element={<ComingSoon title="Histórico" />} />
@@ -115,7 +117,7 @@ export default function App() {
             path="/pro/disponibilidade"
             element={<AvailabilityEditor scope="self" />}
           />
-          <Route path="/pro/ganhos" element={<ComingSoon title="Meus ganhos" />} />
+          <Route path="/pro/ganhos" element={<EarningsPage />} />
           <Route path="/pro/historico" element={<ComingSoon title="Histórico" />} />
         </Route>
       </Route>

@@ -1,26 +1,35 @@
 import {
   addDays,
   addMonths,
+  addQuarters,
   addWeeks,
+  addYears,
   differenceInMinutes,
   eachDayOfInterval,
   endOfMonth,
+  endOfQuarter,
   endOfWeek,
+  endOfYear,
   format,
+  getQuarter,
   isSameDay,
   isSameMonth,
   startOfDay,
   startOfMonth,
+  startOfQuarter,
   startOfWeek,
+  startOfYear,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export type Period = "day" | "week" | "month";
+export type Period = "day" | "week" | "month" | "quarter" | "year";
 
 export const PERIOD_LABELS: Record<Period, string> = {
   day: "Dia",
   week: "Semana",
   month: "Mês",
+  quarter: "Trimestre",
+  year: "Ano",
 };
 
 const L = { locale: ptBR };
@@ -45,6 +54,15 @@ export function periodRange(anchor: Date, period: Period): DateRange {
       end: addDays(endOfWeek(anchor, WEEK_OPTS), 1),
     };
   }
+  if (period === "quarter") {
+    return {
+      start: startOfQuarter(anchor),
+      end: addDays(endOfQuarter(anchor), 1),
+    };
+  }
+  if (period === "year") {
+    return { start: startOfYear(anchor), end: addDays(endOfYear(anchor), 1) };
+  }
   return {
     start: startOfMonth(anchor),
     end: addDays(endOfMonth(anchor), 1),
@@ -54,6 +72,8 @@ export function periodRange(anchor: Date, period: Period): DateRange {
 export function shiftPeriod(anchor: Date, period: Period, dir: -1 | 1): Date {
   if (period === "day") return addDays(anchor, dir);
   if (period === "week") return addWeeks(anchor, dir);
+  if (period === "quarter") return addQuarters(anchor, dir);
+  if (period === "year") return addYears(anchor, dir);
   return addMonths(anchor, dir);
 }
 
@@ -72,9 +92,20 @@ export function periodLabel(anchor: Date, period: Period): string {
     }
     return `${format(start, "d MMM", L)} – ${format(end, "d MMM", L)}`;
   }
+  if (period === "quarter") {
+    return `${getQuarter(anchor)}º trimestre de ${format(anchor, "yyyy")}`;
+  }
+  if (period === "year") {
+    return format(anchor, "yyyy");
+  }
   return format(anchor, "MMMM 'de' yyyy", L).replace(/^\w/, (c) =>
     c.toUpperCase(),
   );
+}
+
+/** Como agrupar o gráfico: por dia (janelas curtas) ou por mês (longas). */
+export function seriesBucket(period: Period): "day" | "month" {
+  return period === "quarter" || period === "year" ? "month" : "day";
 }
 
 export function daysOfWeek(anchor: Date): Date[] {
