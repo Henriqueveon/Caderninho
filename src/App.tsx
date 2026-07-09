@@ -21,7 +21,9 @@ import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { ClientHome } from "@/pages/app/ClientHome";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { FinancePage } from "@/pages/admin/FinancePage";
+import { GoalsPage } from "@/pages/admin/GoalsPage";
 import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
+import { ServicesPage } from "@/pages/admin/ServicesPage";
 import { InvitePage } from "@/pages/auth/InvitePage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
@@ -98,7 +100,8 @@ export default function App() {
           <Route path="/admin/atendimentos" element={<ComingSoon title="Atendimentos" />} />
           <Route path="/admin/financeiro" element={<FinancePage />} />
           <Route path="/admin/profissionais" element={<ProfessionalsPage />} />
-          <Route path="/admin/servicos" element={<ComingSoon title="Serviços" />} />
+          <Route path="/admin/metas" element={<GoalsPage />} />
+          <Route path="/admin/servicos" element={<ServicesPage />} />
           <Route path="/admin/historico" element={<ComingSoon title="Histórico" />} />
           <Route path="/admin/configuracoes" element={<ComingSoon title="Configurações" />} />
         </Route>

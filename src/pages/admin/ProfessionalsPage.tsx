@@ -1,5 +1,6 @@
-import { Mail, Pencil, Phone, Scissors, Trash2, UserPlus } from "lucide-react";
+import { Mail, Pencil, Phone, Scissors, Target, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { InviteSheet } from "@/components/team/InviteSheet";
 import { ProfessionalSheet } from "@/components/team/ProfessionalSheet";
@@ -19,6 +20,7 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 export function ProfessionalsPage() {
+  const navigate = useNavigate();
   const team = useTeam();
   const services = useServices();
   const invites = useInvites();
@@ -46,9 +48,14 @@ export function ProfessionalsPage() {
             Parceiras do estúdio, comissões e serviços.
           </p>
         </div>
-        <Button onClick={() => setInviteOpen(true)}>
-          <UserPlus className="h-4 w-4" /> Convidar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate("/admin/metas")}>
+            <Target className="h-4 w-4" /> Metas e bônus
+          </Button>
+          <Button onClick={() => setInviteOpen(true)}>
+            <UserPlus className="h-4 w-4" /> Convidar
+          </Button>
+        </div>
       </div>
 
       {team.isLoading ? (
