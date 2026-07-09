@@ -133,6 +133,7 @@ export interface Invite {
   token: string;
   email: string;
   full_name: string | null;
+  role: "professional" | "secretary";
   commission_pct: number;
   accepted_at: string | null;
   created_at: string;
