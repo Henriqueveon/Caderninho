@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,20 @@ import {
   type AgendaProfessional,
   useBookAppointment,
 } from "@/hooks/useAgenda";
+import { useProfessionalServices } from "@/hooks/useTeam";
 import { formatBRL, formatMinutes } from "@/lib/format";
 import type { Service } from "@/types/database";
 
 export interface NewApptDefaults {
   professionalId?: string;
   start?: Date;
+}
+
+interface OfferedService {
+  serviceId: string;
+  name: string;
+  price: number;
+  duration: number;
 }
 
 function toDateInput(d: Date) {
@@ -54,6 +62,26 @@ export function NewAppointmentDialog({
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const pid = fixedProfessionalId ?? professionalId;
+  const proServices = useProfessionalServices(pid || undefined);
+
+  // serviços que ESTA profissional faz, com preço/duração dela
+  const offered = useMemo<OfferedService[]>(() => {
+    const list = proServices.data ?? [];
+    return list
+      .map((o) => {
+        const s = services.find((x) => x.id === o.serviceId);
+        if (!s) return null;
+        return {
+          serviceId: o.serviceId,
+          name: s.name,
+          price: o.price ?? s.price,
+          duration: o.durationMinutes ?? s.duration_minutes,
+        };
+      })
+      .filter(Boolean) as OfferedService[];
+  }, [proServices.data, services]);
+
   useEffect(() => {
     if (!open) return;
     const start = defaults.start ?? new Date();
@@ -66,12 +94,18 @@ export function NewAppointmentDialog({
     setError(null);
   }, [open, defaults, fixedProfessionalId]);
 
-  const selectedService = services.find((s) => s.id === serviceId);
+  // se trocar de profissional, limpa serviço que ela não faz
+  useEffect(() => {
+    if (serviceId && !offered.some((o) => o.serviceId === serviceId)) {
+      setServiceId("");
+    }
+  }, [offered, serviceId]);
+
+  const selected = offered.find((o) => o.serviceId === serviceId);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const pid = fixedProfessionalId ?? professionalId;
     if (!pid || !serviceId) {
       setError("Escolha a profissional e o serviço.");
       return;
@@ -92,6 +126,14 @@ export function NewAppointmentDialog({
       setError((err as Error).message ?? "Não foi possível agendar.");
     }
   }
+
+  const endPreview = (() => {
+    if (!selected) return null;
+    const [h, m] = time.split(":").map(Number);
+    const end = new Date();
+    end.setHours(h, m + selected.duration, 0, 0);
+    return toTimeInput(end);
+  })();
 
   return (
     <Sheet open={open} onClose={onClose} title="Novo atendimento">
@@ -120,11 +162,18 @@ export function NewAppointmentDialog({
             id="svc"
             value={serviceId}
             onChange={(e) => setServiceId(e.target.value)}
+            disabled={!pid}
           >
-            <option value="">Selecione…</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} · {formatBRL(s.price)} · {formatMinutes(s.duration_minutes)}
+            <option value="">
+              {!pid
+                ? "Escolha a profissional primeiro"
+                : offered.length === 0
+                  ? "Esta profissional não tem serviços"
+                  : "Selecione…"}
+            </option>
+            {offered.map((o) => (
+              <option key={o.serviceId} value={o.serviceId}>
+                {o.name} · {formatBRL(o.price)} · {formatMinutes(o.duration)}
               </option>
             ))}
           </Select>
@@ -152,16 +201,9 @@ export function NewAppointmentDialog({
           </div>
         </div>
 
-        {selectedService && (
+        {selected && endPreview && (
           <p className="text-xs text-muted-foreground">
-            Término previsto às{" "}
-            {(() => {
-              const [h, m] = time.split(":").map(Number);
-              const end = new Date();
-              end.setHours(h, m + selectedService.duration_minutes, 0, 0);
-              return toTimeInput(end);
-            })()}
-            .
+            {formatBRL(selected.price)} · término previsto às {endPreview}.
           </p>
         )}
 

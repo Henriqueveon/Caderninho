@@ -29,6 +29,12 @@ export function useTeam() {
   });
 }
 
+export interface ServiceOverride {
+  serviceId: string;
+  price: number | null; // null = usa o preço base do serviço
+  durationMinutes: number | null;
+}
+
 export interface SaveProfessionalInput {
   professionalId: string;
   profileId: string;
@@ -38,7 +44,27 @@ export interface SaveProfessionalInput {
   color: string;
   bio: string | null;
   active: boolean;
-  serviceIds: string[];
+  services: ServiceOverride[];
+}
+
+/** Serviços que a profissional executa, com preço/duração próprios. */
+export function useProfessionalServices(professionalId: string | undefined) {
+  return useQuery({
+    queryKey: ["professional-services", professionalId],
+    enabled: !!professionalId,
+    queryFn: async (): Promise<ServiceOverride[]> => {
+      const { data, error } = await supabase
+        .from("professional_services")
+        .select("service_id, price, duration_minutes")
+        .eq("professional_id", professionalId!);
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        serviceId: r.service_id as string,
+        price: r.price as number | null,
+        durationMinutes: r.duration_minutes as number | null,
+      }));
+    },
+  });
 }
 
 export function useSaveProfessional() {
@@ -62,18 +88,20 @@ export function useSaveProfessional() {
         .eq("id", input.professionalId);
       if (p2.error) throw p2.error;
 
-      // substitui o conjunto de serviços da profissional
+      // substitui o conjunto de serviços da profissional (com preço/duração)
       const del = await supabase
         .from("professional_services")
         .delete()
         .eq("professional_id", input.professionalId);
       if (del.error) throw del.error;
 
-      if (input.serviceIds.length > 0) {
+      if (input.services.length > 0) {
         const ins = await supabase.from("professional_services").insert(
-          input.serviceIds.map((sid) => ({
+          input.services.map((s) => ({
             professional_id: input.professionalId,
-            service_id: sid,
+            service_id: s.serviceId,
+            price: s.price,
+            duration_minutes: s.durationMinutes,
           })),
         );
         if (ins.error) throw ins.error;
@@ -82,6 +110,7 @@ export function useSaveProfessional() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["team"] });
       qc.invalidateQueries({ queryKey: ["professionals"] });
+      qc.invalidateQueries({ queryKey: ["professional-services"] });
     },
   });
 }

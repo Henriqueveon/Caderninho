@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
 import {
   type TeamMember,
+  useProfessionalServices,
   useRemoveTeamMember,
   useSaveProfessional,
 } from "@/hooks/useTeam";
-import { formatBRL, formatMinutes } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Service } from "@/types/database";
 
@@ -26,6 +25,12 @@ const SWATCHES = [
   "#A855F7",
 ];
 
+interface SvcRow {
+  checked: boolean;
+  price: string;
+  duration: string;
+}
+
 export function ProfessionalSheet({
   member,
   services,
@@ -39,13 +44,15 @@ export function ProfessionalSheet({
 }) {
   const save = useSaveProfessional();
   const remove = useRemoveTeamMember();
+  const overrides = useProfessionalServices(member?.professional_id);
+
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [commission, setCommission] = useState("50");
   const [color, setColor] = useState(SWATCHES[0]);
   const [bio, setBio] = useState("");
   const [active, setActive] = useState(true);
-  const [serviceIds, setServiceIds] = useState<Set<string>>(new Set());
+  const [svc, setSvc] = useState<Map<string, SvcRow>>(new Map());
   const [error, setError] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -58,18 +65,33 @@ export function ProfessionalSheet({
     setColor(member.color);
     setBio(member.bio ?? "");
     setActive(member.active);
-    setServiceIds(new Set(member.service_ids));
     setError(null);
     setConfirmRemove(false);
     setRemoveError(null);
   }, [member]);
 
+  // monta a grade de serviços quando serviços + overrides estão prontos
+  useEffect(() => {
+    if (!member) return;
+    const ov = overrides.data ?? [];
+    const map = new Map<string, SvcRow>();
+    for (const s of services) {
+      const o = ov.find((x) => x.serviceId === s.id);
+      map.set(s.id, {
+        checked: !!o,
+        price: String(o?.price ?? s.price),
+        duration: String(o?.durationMinutes ?? s.duration_minutes),
+      });
+    }
+    setSvc(map);
+  }, [member, services, overrides.data]);
+
   if (!member) return <Sheet open={open} onClose={onClose} title="" children={null} />;
 
-  function toggleService(id: string) {
-    setServiceIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+  function setRow(id: string, patch: Partial<SvcRow>) {
+    setSvc((prev) => {
+      const next = new Map(prev);
+      next.set(id, { ...next.get(id)!, ...patch });
       return next;
     });
   }
@@ -82,6 +104,13 @@ export function ProfessionalSheet({
       setError("A comissão deve ser um número entre 0 e 100.");
       return;
     }
+    const chosen = [...svc.entries()].filter(([, r]) => r.checked);
+    for (const [, r] of chosen) {
+      if (Number(r.price) < 0 || Number(r.duration) <= 0) {
+        setError("Preço e duração dos serviços devem ser válidos.");
+        return;
+      }
+    }
     try {
       await save.mutateAsync({
         professionalId: member!.professional_id,
@@ -92,7 +121,11 @@ export function ProfessionalSheet({
         color,
         bio: bio.trim() || null,
         active,
-        serviceIds: [...serviceIds],
+        services: chosen.map(([serviceId, r]) => ({
+          serviceId,
+          price: r.price === "" ? null : Number(r.price),
+          durationMinutes: r.duration === "" ? null : Number(r.duration),
+        })),
       });
       onClose();
     } catch (err) {
@@ -106,7 +139,6 @@ export function ProfessionalSheet({
       await remove.mutateAsync(member!.professional_id);
       onClose();
     } catch (err) {
-      // ex.: profissional com histórico → sugerir desativar
       setRemoveError((err as Error).message ?? "Não foi possível remover.");
       setConfirmRemove(false);
     }
@@ -175,34 +207,79 @@ export function ProfessionalSheet({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="bio">Bio / observações</Label>
-          <Textarea
+          <textarea
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder="Especialidades, anotações internas…"
+            className="flex min-h-[70px] w-full rounded-xl border border-input bg-card px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label>Serviços que executa</Label>
-          <div className="flex flex-col gap-1.5 rounded-xl border p-3">
-            {services.map((s) => (
-              <label
-                key={s.id}
-                className="flex cursor-pointer items-center gap-2.5 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-primary"
-                  checked={serviceIds.has(s.id)}
-                  onChange={() => toggleService(s.id)}
-                />
-                <span className="flex-1">{s.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {formatBRL(s.price)} · {formatMinutes(s.duration_minutes)}
-                </span>
-              </label>
-            ))}
+          <Label>Serviços, preços e durações</Label>
+          <p className="text-xs text-muted-foreground">
+            Marque os serviços que ela faz e ajuste o preço e a duração dela.
+          </p>
+          <div className="flex flex-col gap-1 rounded-xl border p-2">
+            {services.map((s) => {
+              const row = svc.get(s.id) ?? {
+                checked: false,
+                price: String(s.price),
+                duration: String(s.duration_minutes),
+              };
+              return (
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50"
+                >
+                  <label className="flex flex-1 cursor-pointer items-center gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-primary"
+                      checked={row.checked}
+                      onChange={(e) => setRow(s.id, { checked: e.target.checked })}
+                    />
+                    <span className="min-w-[120px] flex-1">{s.name}</span>
+                  </label>
+                  {row.checked && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">R$</span>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={5}
+                          aria-label={`Preço ${s.name}`}
+                          value={row.price}
+                          onChange={(e) => setRow(s.id, { price: e.target.value })}
+                          className="h-9 w-20"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={5}
+                          step={5}
+                          aria-label={`Duração ${s.name}`}
+                          value={row.duration}
+                          onChange={(e) =>
+                            setRow(s.id, { duration: e.target.value })
+                          }
+                          className="h-9 w-16"
+                        />
+                        <span className="text-xs text-muted-foreground">min</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {services.length === 0 && (
+              <p className="p-2 text-sm text-muted-foreground">
+                Cadastre serviços na aba Serviços primeiro.
+              </p>
+            )}
           </div>
         </div>
 
@@ -232,7 +309,6 @@ export function ProfessionalSheet({
         </Button>
       </form>
 
-      {/* Zona de remoção */}
       <div className="mt-6 border-t pt-4">
         {removeError && (
           <p role="alert" className="mb-3 text-sm text-destructive">
@@ -276,8 +352,8 @@ export function ProfessionalSheet({
           </button>
         )}
         <p className="mt-2 text-xs text-muted-foreground">
-          Quem já tem atendimentos registrados não pode ser removida (para
-          preservar o histórico) — nesse caso, desative acima.
+          Quem já tem atendimentos registrados não pode ser removida — nesse
+          caso, desative acima.
         </p>
       </div>
     </Sheet>

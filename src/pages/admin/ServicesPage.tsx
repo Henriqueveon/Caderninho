@@ -26,7 +26,8 @@ export function ServicesPage() {
         <div>
           <h1 className="text-2xl font-semibold">Serviços</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Catálogo, preços e durações do estúdio.
+            Catálogo do estúdio. O preço/duração aqui é o padrão — cada
+            profissional pode ter o seu, ajustável na aba Equipe.
           </p>
         </div>
         <Button onClick={() => openSheet(null)}>
