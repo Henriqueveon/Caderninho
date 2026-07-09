@@ -86,6 +86,23 @@ export function useSaveProfessional() {
   });
 }
 
+export function useRemoveTeamMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (professionalId: string): Promise<string> => {
+      const { data, error } = await supabase.rpc("remove_team_member", {
+        p_professional_id: professionalId,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["team"] });
+      qc.invalidateQueries({ queryKey: ["professionals"] });
+    },
+  });
+}
+
 export function useInvites() {
   return useQuery({
     queryKey: ["invites"],

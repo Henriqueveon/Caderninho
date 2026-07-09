@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { type TeamMember, useSaveProfessional } from "@/hooks/useTeam";
+import {
+  type TeamMember,
+  useRemoveTeamMember,
+  useSaveProfessional,
+} from "@/hooks/useTeam";
 import { formatBRL, formatMinutes } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Service } from "@/types/database";
@@ -33,6 +38,7 @@ export function ProfessionalSheet({
   onClose: () => void;
 }) {
   const save = useSaveProfessional();
+  const remove = useRemoveTeamMember();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [commission, setCommission] = useState("50");
@@ -41,6 +47,8 @@ export function ProfessionalSheet({
   const [active, setActive] = useState(true);
   const [serviceIds, setServiceIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!member) return;
@@ -52,6 +60,8 @@ export function ProfessionalSheet({
     setActive(member.active);
     setServiceIds(new Set(member.service_ids));
     setError(null);
+    setConfirmRemove(false);
+    setRemoveError(null);
   }, [member]);
 
   if (!member) return <Sheet open={open} onClose={onClose} title="" children={null} />;
@@ -87,6 +97,18 @@ export function ProfessionalSheet({
       onClose();
     } catch (err) {
       setError((err as Error).message ?? "Não foi possível salvar.");
+    }
+  }
+
+  async function handleRemove() {
+    setRemoveError(null);
+    try {
+      await remove.mutateAsync(member!.professional_id);
+      onClose();
+    } catch (err) {
+      // ex.: profissional com histórico → sugerir desativar
+      setRemoveError((err as Error).message ?? "Não foi possível remover.");
+      setConfirmRemove(false);
     }
   }
 
@@ -209,6 +231,55 @@ export function ProfessionalSheet({
           {save.isPending ? "Salvando…" : "Salvar"}
         </Button>
       </form>
+
+      {/* Zona de remoção */}
+      <div className="mt-6 border-t pt-4">
+        {removeError && (
+          <p role="alert" className="mb-3 text-sm text-destructive">
+            {removeError}
+          </p>
+        )}
+        {confirmRemove ? (
+          <div className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+            <p className="text-sm">
+              Remover <strong>{member.full_name}</strong> da equipe? Esta ação
+              não pode ser desfeita.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleRemove}
+                disabled={remove.isPending}
+              >
+                {remove.isPending ? "Removendo…" : "Confirmar remoção"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setConfirmRemove(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setRemoveError(null);
+              setConfirmRemove(true);
+            }}
+            className="inline-flex items-center gap-2 text-sm font-medium text-destructive hover:underline"
+          >
+            <Trash2 className="h-4 w-4" /> Remover da equipe
+          </button>
+        )}
+        <p className="mt-2 text-xs text-muted-foreground">
+          Quem já tem atendimentos registrados não pode ser removida (para
+          preservar o histórico) — nesse caso, desative acima.
+        </p>
+      </div>
     </Sheet>
   );
 }
