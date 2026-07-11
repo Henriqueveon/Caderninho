@@ -1,11 +1,11 @@
 import { type FormEvent, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 
-import { Logo } from "@/components/brand/Logo";
+import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -25,69 +25,70 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
     if (authError) {
-      setError("E-mail ou senha incorretos.");
+      const msg = authError.message.toLowerCase();
+      if (msg.includes("not confirmed")) {
+        setError(
+          "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada (e o spam).",
+        );
+      } else {
+        setError("E-mail ou senha incorretos.");
+      }
       setSubmitting(false);
     }
     // sucesso: AuthContext atualiza a sessão e o Navigate acima redireciona
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="mb-6 flex flex-col items-center gap-3 text-center">
-        <Logo size={52} withWordmark={false} />
-        <div>
-          <h1 className="text-2xl font-semibold">Caderninho</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Seu caderninho de anotações do estúdio, agora profissional.
-          </p>
+    <AuthLayout>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="email">E-mail</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
-      </div>
-      <Card className="w-full max-w-sm">
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error && (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            )}
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Entrando…" : "Entrar"}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Cliente nova?{" "}
-            <Link to="/signup" className="font-medium text-primary hover:underline">
-              Criar conta
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Senha</Label>
+            <Link
+              to="/esqueci-senha"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Esqueci a senha
             </Link>
+          </div>
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
           </p>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+        <Button type="submit" disabled={submitting}>
+          {submitting ? "Entrando…" : "Entrar"}
+        </Button>
+      </form>
+      <p className="mt-5 text-center text-sm text-muted-foreground">
+        Cliente nova?{" "}
+        <Link to="/signup" className="font-medium text-primary hover:underline">
+          Criar conta
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }

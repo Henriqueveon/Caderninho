@@ -26,8 +26,10 @@ import { FinancePage } from "@/pages/admin/FinancePage";
 import { GoalsPage } from "@/pages/admin/GoalsPage";
 import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
 import { ServicesPage } from "@/pages/admin/ServicesPage";
+import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { InvitePage } from "@/pages/auth/InvitePage";
 import { LoginPage } from "@/pages/auth/LoginPage";
+import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
 import { EarningsPage } from "@/pages/pro/EarningsPage";
 import { ProDashboard } from "@/pages/pro/ProDashboard";
@@ -86,6 +88,8 @@ export default function App() {
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+      <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
       <Route path="/invite/:token" element={<InvitePage />} />
 
       {/* GESTORA */}
