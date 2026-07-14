@@ -3,6 +3,7 @@ import {
   Calendar,
   CalendarClock,
   CalendarPlus,
+  ClipboardList,
   Contact,
   History,
   Hourglass,
@@ -28,6 +29,7 @@ import { GoalsPage } from "@/pages/admin/GoalsPage";
 import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
 import { ServicesPage } from "@/pages/admin/ServicesPage";
 import { SettingsPage } from "@/pages/admin/SettingsPage";
+import { AppointmentsPage } from "@/pages/shared/AppointmentsPage";
 import { HistoryPage } from "@/pages/shared/HistoryPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { InvitePage } from "@/pages/auth/InvitePage";
@@ -40,6 +42,7 @@ import { ProDashboard } from "@/pages/pro/ProDashboard";
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Início", icon: LayoutDashboard },
   { to: "/admin/agenda", label: "Agenda", icon: Calendar },
+  { to: "/admin/atendimentos", label: "Atendimentos", icon: ClipboardList },
   { to: "/admin/clientes", label: "Clientes", icon: Contact },
   { to: "/admin/financeiro", label: "Financeiro", icon: BarChart3 },
   { to: "/admin/profissionais", label: "Equipe", icon: Users },
@@ -58,6 +61,7 @@ const PRO_NAV: NavItem[] = [
 
 const SECRETARY_NAV: NavItem[] = [
   { to: "/secretaria/agenda", label: "Agenda", icon: Calendar },
+  { to: "/secretaria/atendimentos", label: "Atendimentos", icon: ClipboardList },
   { to: "/secretaria/clientes", label: "Clientes", icon: Contact },
   { to: "/secretaria/disponibilidade", label: "Horários", icon: CalendarClock },
 ];
@@ -115,7 +119,7 @@ export default function App() {
             path="/admin/disponibilidade"
             element={<AvailabilityEditor scope="all" />}
           />
-          <Route path="/admin/atendimentos" element={<ComingSoon title="Atendimentos" />} />
+          <Route path="/admin/atendimentos" element={<AppointmentsPage />} />
           <Route path="/admin/financeiro" element={<FinancePage />} />
           <Route path="/admin/profissionais" element={<ProfessionalsPage />} />
           <Route path="/admin/metas" element={<GoalsPage />} />
@@ -151,6 +155,7 @@ export default function App() {
             path="/secretaria/agenda"
             element={<AgendaPage scope="all" showRevenue={false} />}
           />
+          <Route path="/secretaria/atendimentos" element={<AppointmentsPage />} />
           <Route path="/secretaria/clientes" element={<ClientsPage />} />
           <Route
             path="/secretaria/disponibilidade"
