@@ -11,6 +11,7 @@ import {
 } from "recharts";
 
 import { MonthClosing } from "@/components/finance/MonthClosing";
+import { PaymentsPanel } from "@/components/finance/PaymentsPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTeam } from "@/hooks/useTeam";
@@ -38,6 +39,7 @@ const PERIODS: Period[] = ["month", "quarter", "year", "week"];
 export function FinancePage() {
   const [period, setPeriod] = useState<Period>("month");
   const [anchor, setAnchor] = useState(() => new Date());
+  const [view, setView] = useState<"relatorio" | "pagamentos">("relatorio");
   const range = useMemo(() => periodRange(anchor, period), [anchor, period]);
 
   const earnings = useEarnings(range);
@@ -70,9 +72,33 @@ export function FinancePage() {
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Financeiro</h1>
-        <Button variant="outline" onClick={exportCSV} disabled={rows.length === 0}>
-          <Download className="h-4 w-4" /> Exportar CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-xl bg-muted p-1">
+            {(["relatorio", "pagamentos"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                  view === v
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {v === "relatorio" ? "Relatório" : "Pagamentos"}
+              </button>
+            ))}
+          </div>
+          {view === "relatorio" && (
+            <Button
+              variant="outline"
+              onClick={exportCSV}
+              disabled={rows.length === 0}
+            >
+              <Download className="h-4 w-4" /> Exportar CSV
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -110,6 +136,8 @@ export function FinancePage() {
         </span>
       </div>
 
+      {view === "relatorio" && (
+      <>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {kpis.map((k) => (
           <Card key={k.label}>
@@ -224,6 +252,17 @@ export function FinancePage() {
       </Card>
 
       {period === "month" && <MonthClosing month={anchor} perPro={perPro} />}
+      </>
+      )}
+
+      {view === "pagamentos" && (
+        <PaymentsPanel
+          perPro={perPro}
+          anchor={anchor}
+          period={period}
+          range={range}
+        />
+      )}
     </section>
   );
 }

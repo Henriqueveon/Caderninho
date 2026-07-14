@@ -2,6 +2,7 @@ import { ForecastCards } from "@/components/finance/ForecastCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { useMyProfessional } from "@/hooks/useAgenda";
 import { useEarnings, useForecast } from "@/hooks/useFinance";
+import { KIND_LABEL, METHOD_LABEL, usePayments } from "@/hooks/usePayments";
 import { periodRange } from "@/lib/dates";
 import { formatBRL } from "@/lib/format";
 import { format } from "date-fns";
@@ -15,6 +16,8 @@ export function EarningsPage() {
   const monthRange = useMemo(() => periodRange(new Date(), "month"), []);
   const earnings = useEarnings(monthRange, myPro.data?.id);
   const rows = earnings.data ?? [];
+  const payments = usePayments(monthRange, myPro.data?.id);
+  const paid = (payments.data ?? []).reduce((s, p) => s + Number(p.amount), 0);
 
   return (
     <section className="flex flex-col gap-6">
@@ -70,6 +73,55 @@ export function EarningsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {!payments.isError && (payments.data ?? []).length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-muted-foreground">
+              Recebimentos do mês
+            </h2>
+            <span className="text-sm">
+              <span className="text-muted-foreground">total </span>
+              <span className="tnums font-semibold text-success">
+                {formatBRL(paid)}
+              </span>
+            </span>
+          </div>
+          <Card>
+            <CardContent className="p-0">
+              <ul className="divide-y">
+                {payments.data!.map((p) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between p-4 text-sm"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {KIND_LABEL[p.kind]}
+                        {p.method && (
+                          <span className="font-normal text-muted-foreground">
+                            {" "}
+                            · {METHOD_LABEL[p.method]}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(`${p.paid_at}T00:00:00`), "d 'de' MMM", {
+                          locale: ptBR,
+                        })}
+                        {p.notes ? ` · ${p.notes}` : ""}
+                      </p>
+                    </div>
+                    <p className="tnums font-semibold text-success">
+                      {formatBRL(Number(p.amount))}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </section>
   );
 }

@@ -139,6 +139,21 @@ export interface Invite {
   created_at: string;
 }
 
+export type PaymentKind = "payment" | "advance";
+export type PaymentMethod = "pix" | "cash" | "debit" | "credit" | "other";
+
+export interface Payment {
+  id: string;
+  studio_id: string;
+  professional_id: string;
+  kind: PaymentKind;
+  method: PaymentMethod | null;
+  amount: number;
+  paid_at: string; // "YYYY-MM-DD"
+  notes: string | null;
+  created_at: string;
+}
+
 export interface ActivityLog {
   id: string;
   studio_id: string;
