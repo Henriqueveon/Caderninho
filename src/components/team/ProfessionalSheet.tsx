@@ -253,7 +253,7 @@ export function ProfessionalSheet({
                           aria-label={`Preço ${s.name}`}
                           value={row.price}
                           onChange={(e) => setRow(s.id, { price: e.target.value })}
-                          className="h-9 w-20"
+                          className="h-9 w-[72px] px-2"
                         />
                       </div>
                       <div className="flex items-center gap-1">
@@ -266,7 +266,7 @@ export function ProfessionalSheet({
                           onChange={(e) =>
                             setRow(s.id, { duration: e.target.value })
                           }
-                          className="h-9 w-16"
+                          className="h-9 w-[64px] px-2"
                         />
                         <span className="text-xs text-muted-foreground">min</span>
                       </div>

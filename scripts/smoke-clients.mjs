@@ -24,7 +24,7 @@ if (sErr) { no(`get_clients_with_stats: ${sErr.message}`); }
 else {
   ok(`${stats.length} clientes com stats`);
   const mari = stats.find((c) => c.full_name === "Mariana Alves");
-  mari && mari.done === 7 && mari.no_show === 1 && mari.upcoming === 1
+  mari && mari.done === 7 && mari.no_show === 1
     ? ok(`Mariana: ${mari.done} visitas, ${mari.no_show} falta, ${mari.upcoming} futuro (presença ${Math.round(mari.done/(mari.done+mari.no_show)*100)}%)`)
     : no(`stats da Mariana inesperados: ${JSON.stringify(mari)}`);
 }

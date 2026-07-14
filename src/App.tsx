@@ -5,6 +5,7 @@ import {
   CalendarPlus,
   Contact,
   History,
+  Hourglass,
   LayoutDashboard,
   Scissors,
   Settings,
@@ -73,11 +74,16 @@ function RootRedirect() {
 
 function ComingSoon({ title }: { title: string }) {
   return (
-    <section>
+    <section className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold">{title}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Esta tela chega nas próximas fases do MVP.
-      </p>
+      <div className="flex flex-col items-center gap-3 rounded-card bg-card p-12 text-center shadow-card">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary-tint)]">
+          <Hourglass className="h-7 w-7 text-primary" />
+        </span>
+        <p className="max-w-xs text-sm text-muted-foreground">
+          Estamos preparando esta área — ela chega em breve.
+        </p>
+      </div>
     </section>
   );
 }

@@ -92,6 +92,13 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
 
   const weekProfessional = filteredProfessionals[0];
 
+  // Na semana mostramos uma profissional por vez; as estatísticas seguem o
+  // que está visível para não divergirem do grid.
+  const statsAppts =
+    period === "week" && weekProfessional
+      ? appts.filter((a) => a.professional_id === weekProfessional.id)
+      : appts;
+
   function openAppt(a: AppointmentRow) {
     setSheetAppt(a);
     setSheetOpen(true);
@@ -173,7 +180,20 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
         )}
       </div>
 
-      <PeriodStats appointments={appts} showRevenue={showRevenue} />
+      <PeriodStats appointments={statsAppts} showRevenue={showRevenue} />
+
+      {period === "week" && scope === "all" && weekProfessional && (
+        <p className="-mb-1 text-sm">
+          <span className="text-muted-foreground">Agenda de </span>
+          <span className="font-medium">{weekProfessional.full_name}</span>
+          {professionals.length > 1 && (
+            <span className="text-muted-foreground">
+              {" "}
+              — troque no filtro acima
+            </span>
+          )}
+        </p>
+      )}
 
       <div className="rounded-2xl bg-card p-2 shadow-sm">
         {appointments.isLoading ? (
@@ -216,13 +236,6 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
           />
         )}
       </div>
-
-      {scope === "all" && period === "week" && professionals.length > 1 && (
-        <p className="text-xs text-muted-foreground">
-          A visão de semana mostra uma profissional por vez — use o filtro acima
-          para trocar.
-        </p>
-      )}
 
       <AppointmentSheet
         appointment={sheetAppt}

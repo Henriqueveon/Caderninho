@@ -113,19 +113,19 @@ export function AppShell({ items }: { items: NavItem[] }) {
         aria-label="Principal"
         className="fixed inset-x-0 bottom-0 z-10 flex border-t border-border bg-card/90 px-1 py-1 backdrop-blur-md md:hidden"
       >
-        {items.slice(0, 5).map((item) => (
+        {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[11px] font-medium transition-colors",
+                "flex min-h-[52px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[10px] font-medium transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",
               )
             }
           >
-            <item.icon className="h-5 w-5" aria-hidden="true" />
-            {item.label}
+            <item.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+            <span className="max-w-full truncate px-0.5">{item.label}</span>
           </NavLink>
         ))}
       </nav>
