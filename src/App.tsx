@@ -27,6 +27,8 @@ import { FinancePage } from "@/pages/admin/FinancePage";
 import { GoalsPage } from "@/pages/admin/GoalsPage";
 import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
 import { ServicesPage } from "@/pages/admin/ServicesPage";
+import { SettingsPage } from "@/pages/admin/SettingsPage";
+import { HistoryPage } from "@/pages/shared/HistoryPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { InvitePage } from "@/pages/auth/InvitePage";
 import { LoginPage } from "@/pages/auth/LoginPage";
@@ -42,6 +44,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/financeiro", label: "Financeiro", icon: BarChart3 },
   { to: "/admin/profissionais", label: "Equipe", icon: Users },
   { to: "/admin/servicos", label: "Serviços", icon: Scissors },
+  { to: "/admin/historico", label: "Histórico", icon: History },
   { to: "/admin/configuracoes", label: "Ajustes", icon: Settings },
 ];
 
@@ -117,8 +120,8 @@ export default function App() {
           <Route path="/admin/profissionais" element={<ProfessionalsPage />} />
           <Route path="/admin/metas" element={<GoalsPage />} />
           <Route path="/admin/servicos" element={<ServicesPage />} />
-          <Route path="/admin/historico" element={<ComingSoon title="Histórico" />} />
-          <Route path="/admin/configuracoes" element={<ComingSoon title="Configurações" />} />
+          <Route path="/admin/historico" element={<HistoryPage scope="all" />} />
+          <Route path="/admin/configuracoes" element={<SettingsPage />} />
         </Route>
       </Route>
 
@@ -136,7 +139,7 @@ export default function App() {
             element={<AvailabilityEditor scope="self" />}
           />
           <Route path="/pro/ganhos" element={<EarningsPage />} />
-          <Route path="/pro/historico" element={<ComingSoon title="Histórico" />} />
+          <Route path="/pro/historico" element={<HistoryPage scope="self" />} />
         </Route>
       </Route>
 

@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { MonthClosing } from "@/components/finance/MonthClosing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTeam } from "@/hooks/useTeam";
@@ -221,6 +222,8 @@ export function FinancePage() {
           </div>
         </CardContent>
       </Card>
+
+      {period === "month" && <MonthClosing month={anchor} perPro={perPro} />}
     </section>
   );
 }

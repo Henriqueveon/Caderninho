@@ -99,6 +99,21 @@ export function professionalsCSV(rows: ProfessionalTotals[]): string {
   return "﻿" + lines.join("\r\n");
 }
 
+/** CSV do fechamento do mês (comissão + bônus + total a pagar). */
+export function closingCSV(
+  rows: { name: string; commission: number; bonus: number; toPay: number }[],
+): string {
+  const money = (n: number) => n.toFixed(2).replace(".", ",");
+  const header = ["Profissional", "Comissao", "Bonus", "Total a pagar"];
+  const body = rows.map((r) => [
+    r.name,
+    money(r.commission),
+    money(r.bonus),
+    money(r.toPay),
+  ]);
+  return "﻿" + [header, ...body].map((c) => c.join(";")).join("\r\n");
+}
+
 export function downloadCSV(filename: string, csv: string) {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
