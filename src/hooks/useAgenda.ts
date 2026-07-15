@@ -122,9 +122,10 @@ export function useBookAppointment() {
 
 export interface StatusPatch {
   id: string;
-  status: AppointmentStatus;
+  status?: AppointmentStatus;
   actual_start?: string | null;
   actual_end?: string | null;
+  payment_method?: string | null;
   canceled_by?: "client" | "professional" | "owner";
 }
 
@@ -142,5 +143,48 @@ export function useUpdateAppointment() {
       qc.invalidateQueries({ queryKey: ["appointments"] });
       qc.invalidateQueries({ queryKey: ["earnings"] });
     },
+  });
+}
+
+export interface EditInput {
+  id: string;
+  professionalId: string;
+  serviceId: string;
+  scheduledStart: Date;
+  clientRecordId?: string;
+  clientName?: string;
+  notes?: string;
+}
+
+export function useEditAppointment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: EditInput) => {
+      const { error } = await supabase.rpc("edit_appointment", {
+        p_id: input.id,
+        p_professional_id: input.professionalId,
+        p_service_id: input.serviceId,
+        p_scheduled_start: input.scheduledStart.toISOString(),
+        p_client_record_id: input.clientRecordId ?? null,
+        p_client_name: input.clientName ?? null,
+        p_notes: input.notes ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["appointments"] }),
+  });
+}
+
+export function useDeleteAppointment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("appointments")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["appointments"] }),
   });
 }

@@ -47,6 +47,7 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
   const [newDefaults, setNewDefaults] = useState<NewApptDefaults>({});
+  const [editingAppt, setEditingAppt] = useState<AppointmentRow | null>(null);
 
   const allProfessionals = useProfessionals();
   const myProfessional = useMyProfessional();
@@ -104,7 +105,13 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
     setSheetOpen(true);
   }
   function openNew(professionalId: string | undefined, start?: Date) {
+    setEditingAppt(null);
     setNewDefaults({ professionalId, start });
+    setNewOpen(true);
+  }
+  function openEdit(a: AppointmentRow) {
+    setSheetOpen(false);
+    setEditingAppt(a);
     setNewOpen(true);
   }
 
@@ -241,14 +248,19 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
         appointment={sheetAppt}
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
+        onEdit={openEdit}
       />
       <NewAppointmentDialog
         open={newOpen}
-        onClose={() => setNewOpen(false)}
+        onClose={() => {
+          setNewOpen(false);
+          setEditingAppt(null);
+        }}
         professionals={professionals}
         services={services.data ?? []}
         defaults={newDefaults}
         fixedProfessionalId={fixedProfessionalId}
+        editing={editingAppt}
       />
     </section>
   );

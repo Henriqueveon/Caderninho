@@ -93,7 +93,7 @@ export function useSaveClient() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
-    mutationFn: async (input: ClientInput) => {
+    mutationFn: async (input: ClientInput): Promise<string> => {
       const payload = {
         full_name: input.fullName,
         phone: input.phone,
@@ -106,12 +106,15 @@ export function useSaveClient() {
           .update(payload)
           .eq("id", input.id);
         if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("clients")
-          .insert({ ...payload, studio_id: profile!.studio_id });
-        if (error) throw error;
+        return input.id;
       }
+      const { data, error } = await supabase
+        .from("clients")
+        .insert({ ...payload, studio_id: profile!.studio_id })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data.id as string;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["clients"] });

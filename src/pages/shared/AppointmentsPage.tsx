@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AppointmentSheet } from "@/components/agenda/AppointmentSheet";
+import { NewAppointmentDialog } from "@/components/agenda/NewAppointmentDialog";
 import { STATUS_META } from "@/components/agenda/status";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import {
   useProfessionals,
   useServices,
 } from "@/hooks/useAgenda";
+import { METHOD_LABEL } from "@/hooks/usePayments";
 import {
   PERIOD_LABELS,
   type Period,
@@ -51,6 +53,8 @@ export function AppointmentsPage() {
   const [query, setQuery] = useState("");
   const [sheetAppt, setSheetAppt] = useState<AppointmentRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [editingAppt, setEditingAppt] = useState<AppointmentRow | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   const range = useMemo(() => periodRange(anchor, period), [anchor, period]);
   const appointments = useAppointments(range, prof === "all" ? undefined : prof);
@@ -85,7 +89,7 @@ export function AppointmentsPage() {
   function exportCSV() {
     const money = (n: number) => n.toFixed(2).replace(".", ",");
     const header = ["Data", "Hora", "Cliente", "Profissional", "Servico", "Status"];
-    if (canSeeRevenue) header.push("Valor");
+    if (canSeeRevenue) header.push("Valor", "Forma pgto");
     const body = rows.map((a) => {
       const line = [
         format(new Date(a.scheduled_start), "dd/MM/yyyy"),
@@ -95,7 +99,11 @@ export function AppointmentsPage() {
         a.service?.name ?? "",
         STATUS_META[a.status].label,
       ];
-      if (canSeeRevenue) line.push(money(a.price_snapshot));
+      if (canSeeRevenue)
+        line.push(
+          money(a.price_snapshot),
+          a.payment_method ? METHOD_LABEL[a.payment_method] : "",
+        );
       return line;
     });
     const csv =
@@ -257,8 +265,15 @@ export function AppointmentsPage() {
                         </p>
                       </div>
                       {canSeeRevenue && (
-                        <span className="tnums hidden shrink-0 text-sm font-medium sm:block">
-                          {formatBRL(a.price_snapshot)}
+                        <span className="hidden shrink-0 flex-col items-end sm:flex">
+                          <span className="tnums text-sm font-medium">
+                            {formatBRL(a.price_snapshot)}
+                          </span>
+                          {a.status === "done" && a.payment_method && (
+                            <span className="text-[11px] text-muted-foreground">
+                              {METHOD_LABEL[a.payment_method]}
+                            </span>
+                          )}
                         </span>
                       )}
                       <span
@@ -279,6 +294,22 @@ export function AppointmentsPage() {
         appointment={sheetAppt}
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
+        onEdit={(a) => {
+          setSheetOpen(false);
+          setEditingAppt(a);
+          setEditOpen(true);
+        }}
+      />
+      <NewAppointmentDialog
+        open={editOpen}
+        onClose={() => {
+          setEditOpen(false);
+          setEditingAppt(null);
+        }}
+        professionals={professionals.data ?? []}
+        services={services.data ?? []}
+        defaults={{}}
+        editing={editingAppt}
       />
     </section>
   );

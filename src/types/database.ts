@@ -80,6 +80,7 @@ export interface Appointment {
   studio_id: string;
   professional_id: string;
   client_id: string | null;
+  client_record_id: string | null;
   client_name_snapshot: string | null;
   service_id: string;
   price_snapshot: number;
@@ -89,6 +90,7 @@ export interface Appointment {
   actual_start: string | null;
   actual_end: string | null;
   status: AppointmentStatus;
+  payment_method: PaymentMethod | null;
   canceled_by: "client" | "professional" | "owner" | null;
   notes: string | null;
   created_by: string | null;

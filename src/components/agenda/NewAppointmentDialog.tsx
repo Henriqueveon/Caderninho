@@ -8,9 +8,11 @@ import { Sheet } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import {
   type AgendaProfessional,
+  type AppointmentRow,
   useBookAppointment,
+  useEditAppointment,
 } from "@/hooks/useAgenda";
-import { useClientOptions } from "@/hooks/useClients";
+import { useClientOptions, useSaveClient } from "@/hooks/useClients";
 import { useProfessionalServices } from "@/hooks/useTeam";
 import { formatBRL, formatMinutes } from "@/lib/format";
 import type { Service } from "@/types/database";
@@ -44,6 +46,7 @@ export function NewAppointmentDialog({
   services,
   defaults,
   fixedProfessionalId,
+  editing,
 }: {
   open: boolean;
   onClose: () => void;
@@ -51,27 +54,31 @@ export function NewAppointmentDialog({
   services: Service[];
   defaults: NewApptDefaults;
   fixedProfessionalId?: string;
+  editing?: AppointmentRow | null;
 }) {
   const book = useBookAppointment();
-  const now = defaults.start ?? new Date();
+  const edit = useEditAppointment();
+  const saveClient = useSaveClient();
+  const clients = useClientOptions();
+  const isEdit = !!editing;
+  const effectiveFixed = isEdit ? undefined : fixedProfessionalId;
 
   const [professionalId, setProfessionalId] = useState("");
   const [serviceId, setServiceId] = useState("");
-  const [date, setDate] = useState(toDateInput(now));
-  const [time, setTime] = useState(toTimeInput(now));
-  const [clientSel, setClientSel] = useState(""); // "" | id | "__avulsa__"
+  const [date, setDate] = useState(() => toDateInput(new Date()));
+  const [time, setTime] = useState(() => toTimeInput(new Date()));
+  const [clientSel, setClientSel] = useState(""); // "" | id | "__avulsa__" | "__nova__"
   const [clientName, setClientName] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const pid = fixedProfessionalId ?? professionalId;
+  const pid = effectiveFixed ?? professionalId;
   const proServices = useProfessionalServices(pid || undefined);
-  const clients = useClientOptions();
 
-  // serviços que ESTA profissional faz, com preço/duração dela
   const offered = useMemo<OfferedService[]>(() => {
-    const list = proServices.data ?? [];
-    return list
+    return (proServices.data ?? [])
       .map((o) => {
         const s = services.find((x) => x.id === o.serviceId);
         if (!s) return null;
@@ -87,25 +94,61 @@ export function NewAppointmentDialog({
 
   useEffect(() => {
     if (!open) return;
-    const start = defaults.start ?? new Date();
-    setProfessionalId(fixedProfessionalId ?? defaults.professionalId ?? "");
-    setDate(toDateInput(start));
-    setTime(toTimeInput(start));
-    setServiceId("");
-    setClientSel("");
-    setClientName("");
-    setNotes("");
+    if (editing) {
+      const start = new Date(editing.scheduled_start);
+      setProfessionalId(editing.professional_id);
+      setServiceId(editing.service_id);
+      setDate(toDateInput(start));
+      setTime(toTimeInput(start));
+      setNotes(editing.notes ?? "");
+      if (editing.client_record_id) setClientSel(editing.client_record_id);
+      else if (editing.client_name_snapshot) {
+        setClientSel("__avulsa__");
+        setClientName(editing.client_name_snapshot);
+      } else setClientSel("");
+    } else {
+      const start = defaults.start ?? new Date();
+      setProfessionalId(fixedProfessionalId ?? defaults.professionalId ?? "");
+      setDate(toDateInput(start));
+      setTime(toTimeInput(start));
+      setServiceId("");
+      setClientSel("");
+      setClientName("");
+    }
+    setNewName("");
+    setNewPhone("");
     setError(null);
-  }, [open, defaults, fixedProfessionalId]);
+  }, [open, editing, defaults, fixedProfessionalId]);
 
-  // se trocar de profissional, limpa serviço que ela não faz
   useEffect(() => {
-    if (serviceId && !offered.some((o) => o.serviceId === serviceId)) {
+    if (serviceId && offered.length > 0 && !offered.some((o) => o.serviceId === serviceId)) {
       setServiceId("");
     }
   }, [offered, serviceId]);
 
   const selected = offered.find((o) => o.serviceId === serviceId);
+
+  async function createClient() {
+    if (!newName.trim()) {
+      setError("Informe o nome da nova cliente.");
+      return;
+    }
+    setError(null);
+    try {
+      const id = await saveClient.mutateAsync({
+        fullName: newName.trim(),
+        phone: newPhone.trim() || null,
+        email: null,
+        notes: null,
+      });
+      await clients.refetch();
+      setClientSel(id);
+      setNewName("");
+      setNewPhone("");
+    } catch (err) {
+      setError((err as Error).message ?? "Não foi possível cadastrar a cliente.");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -114,23 +157,42 @@ export function NewAppointmentDialog({
       setError("Escolha a profissional e o serviço.");
       return;
     }
+    if (clientSel === "__nova__") {
+      setError("Termine de cadastrar a nova cliente (ou escolha outra opção).");
+      return;
+    }
     const [h, min] = time.split(":").map(Number);
     const start = new Date(`${date}T00:00:00`);
     start.setHours(h, min, 0, 0);
     const isRegistered = clientSel && clientSel !== "__avulsa__";
+    const clientRecordId = isRegistered ? clientSel : undefined;
+    const avulsaName =
+      clientSel === "__avulsa__" ? clientName.trim() || undefined : undefined;
+
     try {
-      await book.mutateAsync({
-        professionalId: pid,
-        serviceId,
-        scheduledStart: start,
-        clientRecordId: isRegistered ? clientSel : undefined,
-        clientName:
-          clientSel === "__avulsa__" ? clientName.trim() || undefined : undefined,
-        notes: notes.trim() || undefined,
-      });
+      if (editing) {
+        await edit.mutateAsync({
+          id: editing.id,
+          professionalId: pid,
+          serviceId,
+          scheduledStart: start,
+          clientRecordId,
+          clientName: avulsaName,
+          notes: notes.trim() || undefined,
+        });
+      } else {
+        await book.mutateAsync({
+          professionalId: pid,
+          serviceId,
+          scheduledStart: start,
+          clientRecordId,
+          clientName: avulsaName,
+          notes: notes.trim() || undefined,
+        });
+      }
       onClose();
     } catch (err) {
-      setError((err as Error).message ?? "Não foi possível agendar.");
+      setError((err as Error).message ?? "Não foi possível salvar.");
     }
   }
 
@@ -142,10 +204,16 @@ export function NewAppointmentDialog({
     return toTimeInput(end);
   })();
 
+  const pending = book.isPending || edit.isPending;
+
   return (
-    <Sheet open={open} onClose={onClose} title="Novo atendimento">
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title={isEdit ? "Editar atendimento" : "Novo atendimento"}
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {!fixedProfessionalId && (
+        {!effectiveFixed && (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="prof">Profissional</Label>
             <Select
@@ -189,22 +257,11 @@ export function NewAppointmentDialog({
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="date">Data</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="time">Início</Label>
-            <Input
-              id="time"
-              type="time"
-              step={900}
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
+            <Input id="time" type="time" step={900} value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
         </div>
 
@@ -235,7 +292,9 @@ export function NewAppointmentDialog({
               </optgroup>
             )}
             <option value="__avulsa__">Avulsa (digitar nome)…</option>
+            <option value="__nova__">+ Cadastrar nova cliente…</option>
           </Select>
+
           {clientSel === "__avulsa__" && (
             <Input
               className="mt-2"
@@ -244,15 +303,36 @@ export function NewAppointmentDialog({
               onChange={(e) => setClientName(e.target.value)}
             />
           )}
+
+          {clientSel === "__nova__" && (
+            <div className="mt-2 flex flex-col gap-2 rounded-xl bg-secondary p-3">
+              <Input
+                placeholder="Nome da cliente"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+              <Input
+                placeholder="Telefone (opcional)"
+                type="tel"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={createClient}
+                disabled={saveClient.isPending}
+              >
+                {saveClient.isPending ? "Cadastrando…" : "Cadastrar e usar"}
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="notes">Observações</Label>
-          <Textarea
-            id="notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+          <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
 
         {error && (
@@ -261,8 +341,12 @@ export function NewAppointmentDialog({
           </p>
         )}
 
-        <Button type="submit" disabled={book.isPending}>
-          {book.isPending ? "Agendando…" : "Agendar"}
+        <Button type="submit" disabled={pending}>
+          {pending
+            ? "Salvando…"
+            : isEdit
+              ? "Salvar alterações"
+              : "Agendar"}
         </Button>
       </form>
     </Sheet>
