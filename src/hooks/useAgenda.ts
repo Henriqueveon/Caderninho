@@ -154,6 +154,7 @@ export interface EditInput {
   clientRecordId?: string;
   clientName?: string;
   notes?: string;
+  paymentMethod?: string | null;
 }
 
 export function useEditAppointment() {
@@ -168,10 +169,14 @@ export function useEditAppointment() {
         p_client_record_id: input.clientRecordId ?? null,
         p_client_name: input.clientName ?? null,
         p_notes: input.notes ?? null,
+        p_payment_method: input.paymentMethod ?? null,
       });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["appointments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["appointments"] });
+      qc.invalidateQueries({ queryKey: ["earnings"] });
+    },
   });
 }
 
@@ -179,12 +184,12 @@ export function useDeleteAppointment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("appointments")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.rpc("delete_appointment", { p_id: id });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["appointments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["appointments"] });
+      qc.invalidateQueries({ queryKey: ["earnings"] });
+    },
   });
 }

@@ -13,9 +13,12 @@ import {
   useEditAppointment,
 } from "@/hooks/useAgenda";
 import { useClientOptions, useSaveClient } from "@/hooks/useClients";
+import { METHOD_LABEL } from "@/hooks/usePayments";
 import { useProfessionalServices } from "@/hooks/useTeam";
 import { formatBRL, formatMinutes } from "@/lib/format";
-import type { Service } from "@/types/database";
+import type { PaymentMethod, Service } from "@/types/database";
+
+const PAY_METHODS: PaymentMethod[] = ["pix", "cash", "debit", "credit", "other"];
 
 export interface NewApptDefaults {
   professionalId?: string;
@@ -72,7 +75,10 @@ export function NewAppointmentDialog({
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [payMethod, setPayMethod] = useState<PaymentMethod>("pix");
   const [error, setError] = useState<string | null>(null);
+
+  const isDoneEdit = isEdit && editing?.status === "done";
 
   const pid = effectiveFixed ?? professionalId;
   const proServices = useProfessionalServices(pid || undefined);
@@ -101,6 +107,7 @@ export function NewAppointmentDialog({
       setDate(toDateInput(start));
       setTime(toTimeInput(start));
       setNotes(editing.notes ?? "");
+      setPayMethod((editing.payment_method as PaymentMethod) ?? "pix");
       if (editing.client_record_id) setClientSel(editing.client_record_id);
       else if (editing.client_name_snapshot) {
         setClientSel("__avulsa__");
@@ -179,6 +186,7 @@ export function NewAppointmentDialog({
           clientRecordId,
           clientName: avulsaName,
           notes: notes.trim() || undefined,
+          paymentMethod: isDoneEdit ? payMethod : undefined,
         });
       } else {
         await book.mutateAsync({
@@ -334,6 +342,23 @@ export function NewAppointmentDialog({
           <Label htmlFor="notes">Observações</Label>
           <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
+
+        {isDoneEdit && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="pmethod">Forma de pagamento da cliente</Label>
+            <Select
+              id="pmethod"
+              value={payMethod}
+              onChange={(e) => setPayMethod(e.target.value as PaymentMethod)}
+            >
+              {PAY_METHODS.map((m) => (
+                <option key={m} value={m}>
+                  {METHOD_LABEL[m]}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
 
         {error && (
           <p role="alert" className="text-sm text-destructive">

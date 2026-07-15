@@ -55,12 +55,11 @@ export function AppointmentSheet({
   const role = profile?.role;
   const canManage = role === "owner" || role === "secretary";
   const canSeeFinance = role !== "secretary";
-  const isTerminal =
-    appointment.status === "done" ||
-    appointment.status === "canceled" ||
-    appointment.status === "no_show";
-  const canEdit = (canManage || role === "professional") && !isTerminal;
-  const canDelete = canManage && appointment.status !== "done";
+  const isDead =
+    appointment.status === "canceled" || appointment.status === "no_show";
+  // concluído pode ser editado (recalcula comissão); cancelado/faltou não
+  const canEdit = (canManage || role === "professional") && !isDead;
+  const canDelete = canManage; // qualquer status (a gestão remove via RPC)
   const canceledBy = role === "professional" ? "professional" : "owner";
   const meta = STATUS_META[appointment.status];
   const id = appointment.id;
