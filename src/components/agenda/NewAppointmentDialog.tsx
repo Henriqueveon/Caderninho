@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -67,7 +68,7 @@ export function NewAppointmentDialog({
   const effectiveFixed = isEdit ? undefined : fixedProfessionalId;
 
   const [professionalId, setProfessionalId] = useState("");
-  const [serviceId, setServiceId] = useState("");
+  const [serviceIds, setServiceIds] = useState<string[]>([]);
   const [date, setDate] = useState(() => toDateInput(new Date()));
   const [time, setTime] = useState(() => toTimeInput(new Date()));
   const [clientSel, setClientSel] = useState(""); // "" | id | "__avulsa__" | "__nova__"
@@ -103,7 +104,10 @@ export function NewAppointmentDialog({
     if (editing) {
       const start = new Date(editing.scheduled_start);
       setProfessionalId(editing.professional_id);
-      setServiceId(editing.service_id);
+      const ids = (editing.items ?? [])
+        .map((it) => it.service_id)
+        .filter((x): x is string => !!x);
+      setServiceIds(ids.length ? ids : [editing.service_id]);
       setDate(toDateInput(start));
       setTime(toTimeInput(start));
       setNotes(editing.notes ?? "");
@@ -118,7 +122,7 @@ export function NewAppointmentDialog({
       setProfessionalId(fixedProfessionalId ?? defaults.professionalId ?? "");
       setDate(toDateInput(start));
       setTime(toTimeInput(start));
-      setServiceId("");
+      setServiceIds([]);
       setClientSel("");
       setClientName("");
     }
@@ -127,13 +131,36 @@ export function NewAppointmentDialog({
     setError(null);
   }, [open, editing, defaults, fixedProfessionalId]);
 
-  useEffect(() => {
-    if (serviceId && offered.length > 0 && !offered.some((o) => o.serviceId === serviceId)) {
-      setServiceId("");
+  // fallback p/ resolver serviços que não estejam mais na lista da profissional (edição)
+  const itemFallback = useMemo(() => {
+    const m = new Map<string, OfferedService>();
+    for (const it of editing?.items ?? []) {
+      if (it.service_id)
+        m.set(it.service_id, {
+          serviceId: it.service_id,
+          name: it.name_snapshot,
+          price: it.price,
+          duration: it.duration_minutes,
+        });
     }
-  }, [offered, serviceId]);
+    return m;
+  }, [editing]);
 
-  const selected = offered.find((o) => o.serviceId === serviceId);
+  const resolve = (sid: string): OfferedService | undefined =>
+    offered.find((o) => o.serviceId === sid) ?? itemFallback.get(sid);
+
+  // ao trocar de profissional, descarta serviços que ela não oferece
+  useEffect(() => {
+    if (!editing && pid && offered.length > 0) {
+      setServiceIds((ids) => ids.filter((sid) => offered.some((o) => o.serviceId === sid)));
+    }
+  }, [offered, editing, pid]);
+
+  const selectedItems = serviceIds
+    .map((sid) => resolve(sid))
+    .filter(Boolean) as OfferedService[];
+  const totalPrice = selectedItems.reduce((s, o) => s + o.price, 0);
+  const totalDuration = selectedItems.reduce((s, o) => s + o.duration, 0);
 
   async function createClient() {
     if (!newName.trim()) {
@@ -160,8 +187,8 @@ export function NewAppointmentDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!pid || !serviceId) {
-      setError("Escolha a profissional e o serviço.");
+    if (!pid || serviceIds.length === 0) {
+      setError("Escolha a profissional e ao menos um serviço.");
       return;
     }
     if (clientSel === "__nova__") {
@@ -181,7 +208,7 @@ export function NewAppointmentDialog({
         await edit.mutateAsync({
           id: editing.id,
           professionalId: pid,
-          serviceId,
+          serviceIds,
           scheduledStart: start,
           clientRecordId,
           clientName: avulsaName,
@@ -191,7 +218,7 @@ export function NewAppointmentDialog({
       } else {
         await book.mutateAsync({
           professionalId: pid,
-          serviceId,
+          serviceIds,
           scheduledStart: start,
           clientRecordId,
           clientName: avulsaName,
@@ -205,10 +232,10 @@ export function NewAppointmentDialog({
   }
 
   const endPreview = (() => {
-    if (!selected) return null;
+    if (totalDuration === 0) return null;
     const [h, m] = time.split(":").map(Number);
     const end = new Date();
-    end.setHours(h, m + selected.duration, 0, 0);
+    end.setHours(h, m + totalDuration, 0, 0);
     return toTimeInput(end);
   })();
 
@@ -240,19 +267,55 @@ export function NewAppointmentDialog({
         )}
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="svc">Serviço</Label>
+          <Label htmlFor="svc">Serviços</Label>
+          {serviceIds.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {serviceIds.map((sid, idx) => {
+                const o = resolve(sid);
+                return (
+                  <li
+                    key={idx}
+                    className="flex items-center justify-between gap-2 rounded-xl bg-secondary px-3 py-2 text-sm"
+                  >
+                    <span className="min-w-0 truncate">
+                      {o?.name ?? "Serviço"}
+                      <span className="text-muted-foreground">
+                        {" · "}
+                        {formatBRL(o?.price ?? 0)} · {formatMinutes(o?.duration ?? 0)}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Remover serviço"
+                      onClick={() =>
+                        setServiceIds((ids) => ids.filter((_, i) => i !== idx))
+                      }
+                      className="shrink-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <Select
             id="svc"
-            value={serviceId}
-            onChange={(e) => setServiceId(e.target.value)}
+            value=""
             disabled={!pid}
+            onChange={(e) => {
+              if (e.target.value)
+                setServiceIds((ids) => [...ids, e.target.value]);
+            }}
           >
             <option value="">
               {!pid
                 ? "Escolha a profissional primeiro"
                 : offered.length === 0
                   ? "Esta profissional não tem serviços"
-                  : "Selecione…"}
+                  : serviceIds.length > 0
+                    ? "+ Adicionar outro serviço…"
+                    : "Selecione…"}
             </option>
             {offered.map((o) => (
               <option key={o.serviceId} value={o.serviceId}>
@@ -269,13 +332,14 @@ export function NewAppointmentDialog({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="time">Início</Label>
-            <Input id="time" type="time" step={900} value={time} onChange={(e) => setTime(e.target.value)} />
+            <Input id="time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
         </div>
 
-        {selected && endPreview && (
+        {selectedItems.length > 0 && endPreview && (
           <p className="text-xs text-muted-foreground">
-            {formatBRL(selected.price)} · término previsto às {endPreview}.
+            Total <span className="font-medium text-foreground">{formatBRL(totalPrice)}</span> ·{" "}
+            {formatMinutes(totalDuration)} · término previsto às {endPreview}.
           </p>
         )}
 

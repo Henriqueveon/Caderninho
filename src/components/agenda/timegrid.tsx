@@ -139,7 +139,10 @@ export function DayColumn({
             <span className="block font-medium truncate">
               {timeLabel(a.scheduled_start)} {a.client_name_snapshot ?? "—"}
             </span>
-            <span className="block truncate opacity-80">{a.service?.name}</span>
+            <span className="block truncate opacity-80">
+              {a.service?.name}
+              {(a.items?.length ?? 0) > 1 ? ` +${a.items!.length - 1}` : ""}
+            </span>
           </button>
         );
       })}

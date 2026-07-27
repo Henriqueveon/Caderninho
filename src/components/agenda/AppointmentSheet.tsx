@@ -114,6 +114,23 @@ export function AppointmentSheet({
               {timeLabel(appointment.scheduled_end)}
             </span>
           </div>
+          {appointment.items && appointment.items.length > 1 && (
+            <div className="border-t pt-3">
+              <span className="text-muted-foreground">Serviços</span>
+              <ul className="mt-1 space-y-1">
+                {appointment.items.map((it, i) => (
+                  <li key={i} className="flex justify-between">
+                    <span>{it.name_snapshot}</span>
+                    {canSeeFinance && (
+                      <span className="tnums text-muted-foreground">
+                        {formatBRL(it.price)}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {canSeeFinance && (
             <>
               <div className="flex justify-between border-t pt-3">

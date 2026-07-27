@@ -262,6 +262,9 @@ export function AppointmentsPage() {
                           />
                           {proName(a.professional_id)}
                           {a.service?.name ? ` · ${a.service.name}` : ""}
+                          {(a.items?.length ?? 0) > 1
+                            ? ` +${a.items!.length - 1}`
+                            : ""}
                         </p>
                       </div>
                       {canSeeRevenue && (

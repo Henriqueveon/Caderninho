@@ -13,8 +13,16 @@ export interface AgendaProfessional {
   bio: string | null;
 }
 
+export interface AppointmentItem {
+  service_id: string | null;
+  name_snapshot: string;
+  price: number;
+  duration_minutes: number;
+}
+
 export interface AppointmentRow extends Appointment {
   service: { name: string; duration_minutes: number } | null;
+  items: AppointmentItem[] | null;
 }
 
 /** Serviços ativos do estúdio. */
@@ -75,7 +83,9 @@ export function useAppointments(range: DateRange, professionalId?: string) {
     queryFn: async (): Promise<AppointmentRow[]> => {
       let q = supabase
         .from("appointments")
-        .select("*, service:service_id(name, duration_minutes)")
+        .select(
+          "*, service:service_id(name, duration_minutes), items:appointment_items(service_id, name_snapshot, price, duration_minutes)",
+        )
         .gte("scheduled_start", range.start.toISOString())
         .lt("scheduled_start", range.end.toISOString())
         .order("scheduled_start");
@@ -89,7 +99,7 @@ export function useAppointments(range: DateRange, professionalId?: string) {
 
 export interface BookInput {
   professionalId: string;
-  serviceId: string;
+  serviceIds: string[];
   scheduledStart: Date;
   clientName?: string;
   clientId?: string;
@@ -103,7 +113,8 @@ export function useBookAppointment() {
     mutationFn: async (input: BookInput) => {
       const { data, error } = await supabase.rpc("book_appointment", {
         p_professional_id: input.professionalId,
-        p_service_id: input.serviceId,
+        p_service_id: input.serviceIds[0],
+        p_service_ids: input.serviceIds,
         p_scheduled_start: input.scheduledStart.toISOString(),
         p_client_id: input.clientId ?? null,
         p_client_name: input.clientName ?? null,
@@ -149,7 +160,7 @@ export function useUpdateAppointment() {
 export interface EditInput {
   id: string;
   professionalId: string;
-  serviceId: string;
+  serviceIds: string[];
   scheduledStart: Date;
   clientRecordId?: string;
   clientName?: string;
@@ -164,7 +175,8 @@ export function useEditAppointment() {
       const { error } = await supabase.rpc("edit_appointment", {
         p_id: input.id,
         p_professional_id: input.professionalId,
-        p_service_id: input.serviceId,
+        p_service_id: input.serviceIds[0],
+        p_service_ids: input.serviceIds,
         p_scheduled_start: input.scheduledStart.toISOString(),
         p_client_record_id: input.clientRecordId ?? null,
         p_client_name: input.clientName ?? null,
