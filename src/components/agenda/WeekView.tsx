@@ -1,6 +1,6 @@
 import type { AppointmentRow } from "@/hooks/useAgenda";
 import { WEEKDAY_LABELS, dayNumber, daysOfWeek, isSameDay } from "@/lib/dates";
-import { DayColumn, TimeGutter } from "./timegrid";
+import { DayColumn, TimeGutter, computeHourRange } from "./timegrid";
 
 /** Semana de uma única profissional: 7 colunas de dia. */
 export function WeekView({
@@ -18,6 +18,7 @@ export function WeekView({
 }) {
   const days = daysOfWeek(anchor);
   const today = new Date();
+  const range = computeHourRange(appointments);
 
   return (
     <div className="overflow-x-auto">
@@ -46,12 +47,13 @@ export function WeekView({
           })}
         </div>
         <div className="flex">
-          <TimeGutter />
+          <TimeGutter range={range} />
           {days.map((d) => (
             <div key={d.toISOString()} className="flex-1">
               <DayColumn
                 date={d}
                 color={color}
+                range={range}
                 appointments={appointments.filter((a) =>
                   isSameDay(new Date(a.scheduled_start), d),
                 )}

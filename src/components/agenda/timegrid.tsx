@@ -2,29 +2,59 @@ import { minutesOfDay, timeLabel } from "@/lib/dates";
 import type { AppointmentRow } from "@/hooks/useAgenda";
 import { STATUS_META } from "./status";
 
-export const DAY_START_HOUR = 8;
-export const DAY_END_HOUR = 20;
 export const HOUR_PX = 56;
-const TOTAL_MIN = (DAY_END_HOUR - DAY_START_HOUR) * 60;
 
-export function gridHeight() {
-  return (DAY_END_HOUR - DAY_START_HOUR) * HOUR_PX;
+export interface HourRange {
+  start: number; // hora inicial (0–24)
+  end: number; // hora final (0–24)
 }
 
-function offsetPx(min: number) {
-  return ((min - DAY_START_HOUR * 60) / 60) * HOUR_PX;
+/** Faixa padrão exibida quando não há atendimentos fora dela. */
+export const DEFAULT_RANGE: HourRange = { start: 8, end: 20 };
+
+/**
+ * Calcula a faixa de horas a exibir: parte do padrão (8h–20h) e EXPANDE para
+ * incluir qualquer atendimento mais cedo ou mais tarde — assim nada fica
+ * cortado (ex.: atendimentos das 21h, comuns no estúdio).
+ */
+export function computeHourRange(
+  appointments: { scheduled_start: string; scheduled_end: string }[],
+  base: HourRange = DEFAULT_RANGE,
+): HourRange {
+  let start = base.start;
+  let end = base.end;
+  for (const a of appointments) {
+    const s = new Date(a.scheduled_start);
+    const e = new Date(a.scheduled_end);
+    const sh = s.getHours();
+    const eh = e.getHours() + (e.getMinutes() > 0 || e.getSeconds() > 0 ? 1 : 0);
+    if (sh < start) start = sh;
+    if (eh > end) end = eh;
+  }
+  start = Math.max(0, start);
+  end = Math.min(24, end);
+  if (end <= start) end = start + 1;
+  return { start, end };
 }
 
-export function TimeGutter() {
+export function gridHeight(r: HourRange) {
+  return (r.end - r.start) * HOUR_PX;
+}
+
+function offsetPx(min: number, r: HourRange) {
+  return ((min - r.start * 60) / 60) * HOUR_PX;
+}
+
+export function TimeGutter({ range }: { range: HourRange }) {
   const hours = [];
-  for (let h = DAY_START_HOUR; h <= DAY_END_HOUR; h++) hours.push(h);
+  for (let h = range.start; h <= range.end; h++) hours.push(h);
   return (
-    <div className="relative w-12 shrink-0" style={{ height: gridHeight() }}>
+    <div className="relative w-12 shrink-0" style={{ height: gridHeight(range) }}>
       {hours.map((h) => (
         <div
           key={h}
           className="absolute right-1 -translate-y-1/2 text-[11px] tabular-nums text-muted-foreground"
-          style={{ top: offsetPx(h * 60) }}
+          style={{ top: offsetPx(h * 60, range) }}
         >
           {String(h).padStart(2, "0")}h
         </div>
@@ -33,14 +63,14 @@ export function TimeGutter() {
   );
 }
 
-function HourLines() {
+function HourLines({ range }: { range: HourRange }) {
   const lines = [];
-  for (let h = DAY_START_HOUR; h <= DAY_END_HOUR; h++) {
+  for (let h = range.start; h <= range.end; h++) {
     lines.push(
       <div
         key={h}
         className="absolute inset-x-0 border-t border-border/60"
-        style={{ top: offsetPx(h * 60) }}
+        style={{ top: offsetPx(h * 60, range) }}
       />,
     );
   }
@@ -55,12 +85,14 @@ export function DayColumn({
   date,
   appointments,
   color,
+  range,
   onSelect,
   onEmptyClick,
 }: {
   date: Date;
   appointments: AppointmentRow[];
   color?: string;
+  range: HourRange;
   onSelect: (a: AppointmentRow) => void;
   onEmptyClick?: (start: Date) => void;
 }) {
@@ -69,27 +101,27 @@ export function DayColumn({
     if (e.target !== e.currentTarget) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const y = e.clientY - rect.top;
-    const min = DAY_START_HOUR * 60 + (y / HOUR_PX) * 60;
+    const min = range.start * 60 + (y / HOUR_PX) * 60;
     const snapped = Math.round(min / 15) * 15;
     const start = new Date(date);
-    start.setHours(0, Math.max(DAY_START_HOUR * 60, snapped), 0, 0);
+    start.setHours(0, Math.max(range.start * 60, snapped), 0, 0);
     onEmptyClick(start);
   }
 
   return (
     <div
       className="relative flex-1 border-l"
-      style={{ height: gridHeight() }}
+      style={{ height: gridHeight(range) }}
       onClick={handleBackgroundClick}
     >
-      <HourLines />
+      <HourLines range={range} />
       {appointments.map((a) => {
         const startMin = minutesOfDay(new Date(a.scheduled_start));
         const endMin = minutesOfDay(new Date(a.scheduled_end));
-        const top = Math.max(0, offsetPx(startMin));
+        const top = Math.max(0, offsetPx(startMin, range));
         const height = Math.max(
           18,
-          ((Math.min(endMin, DAY_END_HOUR * 60) - startMin) / 60) * HOUR_PX - 2,
+          ((Math.min(endMin, range.end * 60) - startMin) / 60) * HOUR_PX - 2,
         );
         const meta = STATUS_META[a.status];
         return (
@@ -107,14 +139,10 @@ export function DayColumn({
             <span className="block font-medium truncate">
               {timeLabel(a.scheduled_start)} {a.client_name_snapshot ?? "—"}
             </span>
-            <span className="block truncate opacity-80">
-              {a.service?.name}
-            </span>
+            <span className="block truncate opacity-80">{a.service?.name}</span>
           </button>
         );
       })}
     </div>
   );
 }
-
-export { TOTAL_MIN };

@@ -1,6 +1,6 @@
 import type { AgendaProfessional, AppointmentRow } from "@/hooks/useAgenda";
 import { isSameDay } from "@/lib/dates";
-import { DayColumn, TimeGutter } from "./timegrid";
+import { DayColumn, TimeGutter, computeHourRange } from "./timegrid";
 
 /** Dia com uma coluna por profissional (visão gestora/secretária). */
 export function DayView({
@@ -19,6 +19,7 @@ export function DayView({
   const dayAppts = appointments.filter((a) =>
     isSameDay(new Date(a.scheduled_start), date),
   );
+  const range = computeHourRange(dayAppts);
 
   if (professionals.length === 0) {
     return (
@@ -47,12 +48,13 @@ export function DayView({
           ))}
         </div>
         <div className="flex">
-          <TimeGutter />
+          <TimeGutter range={range} />
           {professionals.map((p) => (
             <div key={p.id} className="flex-1 min-w-[140px]">
               <DayColumn
                 date={date}
                 color={p.color}
+                range={range}
                 appointments={dayAppts.filter(
                   (a) => a.professional_id === p.id,
                 )}
