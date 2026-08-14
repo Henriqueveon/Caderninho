@@ -3,6 +3,7 @@ import { addDays, endOfMonth, startOfMonth, subDays } from "date-fns";
 
 import type { DateRange } from "@/lib/dates";
 import { computeEarning } from "@/lib/earnings";
+import { fetchPaged } from "@/lib/paged";
 import { generateSlots } from "@/lib/slots";
 import { supabase } from "@/lib/supabase";
 import type {
@@ -32,20 +33,25 @@ export function useEarnings(range: DateRange, professionalId?: string) {
       range.end.toISOString(),
       professionalId ?? "all",
     ],
-    queryFn: async (): Promise<EarningRow[]> => {
-      let q = supabase
-        .from("earnings")
-        .select(
-          "id, professional_id, gross_value, commission_value, studio_value, earned_at, appointment:appointment_id(client_name_snapshot, service:service_id(name))",
-        )
-        .gte("earned_at", range.start.toISOString())
-        .lt("earned_at", range.end.toISOString())
-        .order("earned_at", { ascending: false });
-      if (professionalId) q = q.eq("professional_id", professionalId);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data as unknown as EarningRow[]) ?? [];
-    },
+    // Paginado: um recorte de ano passa das 1000 linhas que o PostgREST
+    // devolve, e um total cortado em silêncio é pior que um erro na tela.
+    queryFn: (): Promise<EarningRow[]> =>
+      fetchPaged<EarningRow>((from, to) => {
+        let q = supabase
+          .from("earnings")
+          .select(
+            "id, professional_id, gross_value, commission_value, studio_value, earned_at, appointment:appointment_id(client_name_snapshot, service:service_id(name))",
+          )
+          .gte("earned_at", range.start.toISOString())
+          .lt("earned_at", range.end.toISOString())
+          .order("earned_at", { ascending: false })
+          .range(from, to);
+        if (professionalId) q = q.eq("professional_id", professionalId);
+        return q as unknown as PromiseLike<{
+          data: EarningRow[] | null;
+          error: { message: string } | null;
+        }>;
+      }),
   });
 }
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { STATUS_META } from "@/components/agenda/status";
+import { useAuth } from "@/contexts/AuthContext";
 import { useProfessionals } from "@/hooks/useAgenda";
 import {
   type ClientStat,
@@ -28,6 +29,8 @@ export function ClientSheet({
   open: boolean;
   onClose: () => void;
 }) {
+  const { profile } = useAuth();
+  const isOwner = profile?.role === "owner";
   const isNew = !client;
   const save = useSaveClient();
   const remove = useRemoveClient();
@@ -193,7 +196,9 @@ export function ClientSheet({
           </div>
         )}
 
-        {client && (
+        {/* Excluir cadastro fica com a gestora: apagar cliente desliga o
+            histórico dela dos atendimentos (FK on delete set null). */}
+        {client && isOwner && (
           <div className="border-t border-border pt-4">
             {confirmRemove ? (
               <div className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3">

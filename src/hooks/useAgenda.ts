@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/contexts/AuthContext";
 import type { DateRange } from "@/lib/dates";
+import { fetchPaged } from "@/lib/paged";
 import { supabase } from "@/lib/supabase";
 import type { Appointment, AppointmentStatus, Service } from "@/types/database";
 
@@ -80,20 +81,25 @@ export function useAppointments(range: DateRange, professionalId?: string) {
       range.end.toISOString(),
       professionalId ?? "all",
     ],
-    queryFn: async (): Promise<AppointmentRow[]> => {
-      let q = supabase
-        .from("appointments")
-        .select(
-          "*, service:service_id(name, duration_minutes), items:appointment_items(service_id, name_snapshot, price, duration_minutes)",
-        )
-        .gte("scheduled_start", range.start.toISOString())
-        .lt("scheduled_start", range.end.toISOString())
-        .order("scheduled_start");
-      if (professionalId) q = q.eq("professional_id", professionalId);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data as AppointmentRow[]) ?? [];
-    },
+    // Paginado: um recorte de ano passa das 1000 linhas que o PostgREST
+    // devolve, e uma lista cortada em silêncio vira estatística errada.
+    queryFn: (): Promise<AppointmentRow[]> =>
+      fetchPaged<AppointmentRow>((from, to) => {
+        let q = supabase
+          .from("appointments")
+          .select(
+            "*, service:service_id(name, duration_minutes), items:appointment_items(service_id, name_snapshot, price, duration_minutes)",
+          )
+          .gte("scheduled_start", range.start.toISOString())
+          .lt("scheduled_start", range.end.toISOString())
+          .order("scheduled_start")
+          .range(from, to);
+        if (professionalId) q = q.eq("professional_id", professionalId);
+        return q as unknown as PromiseLike<{
+          data: AppointmentRow[] | null;
+          error: { message: string } | null;
+        }>;
+      }),
   });
 }
 

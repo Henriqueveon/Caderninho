@@ -130,7 +130,14 @@ export function ProFinancePage() {
 
       {view === "ganhos" ? (
         <>
-          <ForecastCards forecast={forecast.data} loading={forecast.isLoading} />
+          <div>
+            {/* A previsão é sempre do MÊS corrente — por isso leva rótulo
+                próprio e fica fora do bloco que obedece ao seletor. */}
+            <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
+              Previsão de {format(new Date(), "MMMM", { locale: ptBR })}
+            </h2>
+            <ForecastCards forecast={forecast.data} loading={forecast.isLoading} />
+          </div>
 
           <div>
             <h2 className="mb-2 text-sm font-semibold text-muted-foreground">

@@ -15,52 +15,44 @@ export interface Balance {
 
 const zero: Balance = { commission: 0, bonus: 0, paid: 0, saldo: 0 };
 
+interface BalanceRow {
+  professional_id: string;
+  commission: number;
+  bonus: number;
+  paid: number;
+  saldo: number;
+}
+
 /**
  * Saldo ACUMULADO por profissional — de propósito sem recorte de período.
  * O relatório por período responde "quanto rendeu em agosto"; isto responde
  * "quanto ainda devo a ela", que é a pergunta do dia do pagamento e não pode
  * depender do filtro que estiver na tela.
  *
- * A RLS já escopa: a gestora recebe a equipe inteira, a profissional só a si.
+ * A soma é feita no Postgres (RPC get_balances), e não somando as linhas aqui:
+ * o PostgREST devolve no máximo 1000 registros, então uma soma no navegador
+ * começaria a errar dinheiro EM SILÊNCIO quando o estúdio passasse disso.
+ * O próprio RPC escopa por papel — a gestora recebe a equipe, a profissional
+ * só a si mesma, a secretária não recebe nada.
  */
 export function useBalances() {
   return useQuery({
     queryKey: ["balances"],
     queryFn: async (): Promise<Map<string, Balance>> => {
-      const [earnings, bonuses, payments] = await Promise.all([
-        supabase.from("earnings").select("professional_id, commission_value"),
-        supabase.from("bonuses").select("professional_id, value"),
-        supabase.from("payments").select("professional_id, amount"),
-      ]);
-      if (earnings.error) throw earnings.error;
-
+      const { data, error } = await supabase.rpc("get_balances");
+      if (error) throw error;
       const map = new Map<string, Balance>();
-      const add = (id: string, field: keyof Balance, value: number) => {
-        const cur = map.get(id) ?? { ...zero };
-        map.set(id, { ...cur, [field]: cur[field] + value });
-      };
-
-      for (const e of earnings.data ?? []) {
-        add(e.professional_id, "commission", Number(e.commission_value));
-      }
-      // Bônus e pagamentos podem estar bloqueados por RLS (secretária) ou a
-      // tabela ainda não existir — nesse caso o saldo vale só a comissão.
-      if (!bonuses.error) {
-        for (const b of bonuses.data ?? []) {
-          add(b.professional_id, "bonus", Number(b.value));
-        }
-      }
-      if (!payments.error) {
-        for (const p of payments.data ?? []) {
-          add(p.professional_id, "paid", Number(p.amount));
-        }
-      }
-
-      for (const [id, b] of map) {
-        map.set(id, { ...b, saldo: b.commission + b.bonus - b.paid });
+      for (const r of (data ?? []) as BalanceRow[]) {
+        map.set(r.professional_id, {
+          commission: Number(r.commission),
+          bonus: Number(r.bonus),
+          paid: Number(r.paid),
+          saldo: Number(r.saldo),
+        });
       }
       return map;
     },
+    retry: false,
   });
 }
 
