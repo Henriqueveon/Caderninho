@@ -69,6 +69,49 @@ export function periodRange(anchor: Date, period: Period): DateRange {
   };
 }
 
+// Semana útil do estúdio: segunda a sábado (domingo é folga). É assim que a
+// equipe revisa os ganhos ("quanto vamos ganhar na semana"), não pelo mês.
+const BIZ_WEEK = { weekStartsOn: 1 as const, locale: ptBR };
+
+/** Intervalo seg 00:00 → dom 00:00 (exclusivo) — cobre segunda a sábado. */
+export function businessWeekRange(anchor: Date): DateRange {
+  const start = startOfWeek(anchor, BIZ_WEEK);
+  return { start, end: addDays(start, 6) };
+}
+
+/** Os seis dias úteis (seg…sáb) da semana do anchor. */
+export function businessWeekDays(anchor: Date): Date[] {
+  const start = startOfWeek(anchor, BIZ_WEEK);
+  return eachDayOfInterval({ start, end: addDays(start, 5) });
+}
+
+/** Rótulo curto seg–sáb (ex.: "21–26 de julho"). */
+export function businessWeekLabel(anchor: Date): string {
+  const start = startOfWeek(anchor, BIZ_WEEK);
+  const end = addDays(start, 5);
+  if (isSameMonth(start, end)) {
+    return `${format(start, "d", L)}–${format(end, "d 'de' MMMM", L)}`;
+  }
+  return `${format(start, "d MMM", L)} – ${format(end, "d MMM", L)}`;
+}
+
+/** Tempo relativo humano para o futuro próximo: "agora", "em 40min", "em 2h", "amanhã 14:30", "sex 09:00". */
+export function relativeTime(target: Date | string, base = new Date()): string {
+  const d = typeof target === "string" ? new Date(target) : target;
+  const diffMin = Math.round(differenceInMinutes(d, base));
+  if (diffMin < -1) return timeLabel(d);
+  if (diffMin <= 1) return "agora";
+  if (diffMin < 60) return `em ${diffMin}min`;
+  if (diffMin < 240 && isSameDay(d, base)) {
+    const h = Math.floor(diffMin / 60);
+    const m = diffMin % 60;
+    return m === 0 ? `em ${h}h` : `em ${h}h${String(m).padStart(2, "0")}`;
+  }
+  if (isSameDay(d, base)) return `hoje ${timeLabel(d)}`;
+  if (isSameDay(d, addDays(base, 1))) return `amanhã ${timeLabel(d)}`;
+  return `${format(d, "EEE", L)} ${timeLabel(d)}`;
+}
+
 export function shiftPeriod(anchor: Date, period: Period, dir: -1 | 1): Date {
   if (period === "day") return addDays(anchor, dir);
   if (period === "week") return addWeeks(anchor, dir);

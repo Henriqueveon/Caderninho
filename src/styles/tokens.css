@@ -22,6 +22,8 @@
 
   /* ---- BORDAS ---- */
   --border: #ece4e2; /* quase invisível */
+  --rule: #e5d9d4; /* linha-guia do "caderno" (um tom mais presente) */
+  --rule-ink: rgba(45, 42, 46, 0.14); /* linha de ênfase (tinta) */
 
   /* ---- FEEDBACK DE ESTADO ---- */
   --success: #7a8450; /* verde oliva suave (concluído) */
@@ -49,6 +51,7 @@
 
   /* ---- TIPOGRAFIA ---- */
   --font: "Plus Jakarta Sans", "Inter", "Manrope", system-ui, sans-serif;
+  --font-display: "Fraunces", "Georgia", "Times New Roman", serif;
   --weight-title: 600;
   --weight-body: 400;
   --weight-btn: 500;
@@ -68,6 +71,8 @@
   --text: #f5f2f1;
   --text-secondary: #a39d9b;
   --border: #322f2f;
+  --rule: #37332f;
+  --rule-ink: rgba(245, 242, 241, 0.16);
   --primary-tint: rgba(217, 160, 169, 0.14);
   --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 10px 40px rgba(0, 0, 0, 0.35);

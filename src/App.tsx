@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Scissors,
   Settings,
+  Sparkles,
   User,
   Users,
   Wallet,
@@ -31,6 +32,7 @@ import { ServicesPage } from "@/pages/admin/ServicesPage";
 import { SettingsPage } from "@/pages/admin/SettingsPage";
 import { AppointmentsPage } from "@/pages/shared/AppointmentsPage";
 import { HistoryPage } from "@/pages/shared/HistoryPage";
+import { InsightsPage } from "@/pages/shared/InsightsPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { InvitePage } from "@/pages/auth/InvitePage";
 import { LoginPage } from "@/pages/auth/LoginPage";
@@ -41,6 +43,7 @@ import { ProDashboard } from "@/pages/pro/ProDashboard";
 
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Início", icon: LayoutDashboard },
+  { to: "/admin/insights", label: "Insights", icon: Sparkles },
   { to: "/admin/agenda", label: "Agenda", icon: Calendar },
   { to: "/admin/atendimentos", label: "Atendimentos", icon: ClipboardList },
   { to: "/admin/clientes", label: "Clientes", icon: Contact },
@@ -53,6 +56,7 @@ const ADMIN_NAV: NavItem[] = [
 
 const PRO_NAV: NavItem[] = [
   { to: "/pro/dashboard", label: "Início", icon: LayoutDashboard },
+  { to: "/pro/insights", label: "Insights", icon: Sparkles },
   { to: "/pro/agenda", label: "Agenda", icon: Calendar },
   { to: "/pro/disponibilidade", label: "Horários", icon: CalendarClock },
   { to: "/pro/ganhos", label: "Ganhos", icon: Wallet },
@@ -110,6 +114,7 @@ export default function App() {
         <Route element={<AppShell items={ADMIN_NAV} />}>
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/insights" element={<InsightsPage />} />
           <Route
             path="/admin/agenda"
             element={<AgendaPage scope="all" showRevenue />}
@@ -134,6 +139,7 @@ export default function App() {
         <Route element={<AppShell items={PRO_NAV} />}>
           <Route path="/pro" element={<Navigate to="/pro/dashboard" replace />} />
           <Route path="/pro/dashboard" element={<ProDashboard />} />
+          <Route path="/pro/insights" element={<InsightsPage />} />
           <Route
             path="/pro/agenda"
             element={<AgendaPage scope="self" showRevenue={false} />}

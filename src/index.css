@@ -29,14 +29,34 @@
   h2,
   h3,
   h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
     font-weight: var(--weight-title);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
 }
 
 @layer utilities {
   .tnums {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* rótulo "de planner": versalete espaçado */
+  .kicker {
+    font-family: var(--font);
+    font-size: 11px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  /* números editoriais (serifa + tabular + tamanho óptico) */
+  .figure {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variant-numeric: tabular-nums lining-nums;
   }
 
   /* gradiente primário (botões, marca) */

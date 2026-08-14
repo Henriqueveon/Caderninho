@@ -111,7 +111,8 @@ export function AppShell({ items }: { items: NavItem[] }) {
       {/* Barra inferior mobile */}
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-10 flex border-t border-border bg-card/90 px-1 py-1 backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-10 flex overflow-x-auto border-t border-border bg-card/90 px-1 py-1 backdrop-blur-md [&::-webkit-scrollbar]:hidden md:hidden"
+        style={{ scrollbarWidth: "none" }}
       >
         {items.map((item) => (
           <NavLink
@@ -119,7 +120,7 @@ export function AppShell({ items }: { items: NavItem[] }) {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex min-h-[52px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[10px] font-medium transition-colors",
+                "flex min-h-[52px] flex-1 shrink-0 basis-[64px] flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[10px] font-medium transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",
               )
             }

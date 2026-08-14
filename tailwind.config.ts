@@ -12,6 +12,7 @@ export default {
           "system-ui",
           "sans-serif",
         ],
+        display: ["Fraunces", "Georgia", "Times New Roman", "serif"],
       },
       colors: {
         // superfícies + texto (mapeadas para os design tokens)
@@ -47,6 +48,7 @@ export default {
         success: "var(--success)",
         warning: "var(--warning)",
         border: "var(--border)",
+        rule: "var(--rule)",
         input: "var(--border)",
         ring: "var(--primary)",
       },

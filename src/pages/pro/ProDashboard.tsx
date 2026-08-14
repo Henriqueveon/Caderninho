@@ -1,75 +1,97 @@
-import { useMemo } from "react";
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
-import { ForecastCards } from "@/components/finance/ForecastCards";
-import { Card, CardContent } from "@/components/ui/card";
+import { GoalBar } from "@/components/insights/GoalBar";
+import { HomeHero } from "@/components/insights/HomeHero";
+import { Panel } from "@/components/insights/Panel";
+import { SectionLabel } from "@/components/insights/SectionLabel";
+import { StatTile } from "@/components/insights/StatTile";
+import { UpcomingList } from "@/components/insights/UpcomingList";
+import { WeekColumns } from "@/components/insights/WeekColumns";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAppointments, useMyProfessional } from "@/hooks/useAgenda";
-import { useForecast } from "@/hooks/useFinance";
-import { periodRange, timeLabel } from "@/lib/dates";
-import { STATUS_META } from "@/components/agenda/status";
-import { isSameDay } from "date-fns";
+import { useMyProfessional } from "@/hooks/useAgenda";
+import { useInsights } from "@/hooks/useInsights";
+import { businessWeekLabel } from "@/lib/dates";
+import { formatBRLShort } from "@/lib/format";
+
+const compactBRL = (n: number) =>
+  n >= 1000 ? `${(n / 1000).toFixed(1).replace(".0", "")}k` : n.toFixed(0);
+
+function SeeAll({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex items-center gap-0.5 text-[11px] font-medium text-primary"
+    >
+      {children} <ArrowRight className="h-3 w-3" />
+    </Link>
+  );
+}
 
 export function ProDashboard() {
   const { profile } = useAuth();
   const myPro = useMyProfessional();
-  const forecast = useForecast(myPro.data?.id);
-
-  const todayRange = useMemo(() => periodRange(new Date(), "day"), []);
-  const appts = useAppointments(todayRange, myPro.data?.id);
-  const today = (appts.data ?? []).filter((a) =>
-    isSameDay(new Date(a.scheduled_start), new Date()),
-  );
+  const ins = useInsights(myPro.data?.id);
+  const firstName = profile?.full_name.split(" ")[0];
 
   return (
-    <section className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Olá, {profile?.full_name.split(" ")[0]}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Seus ganhos e sua agenda de hoje
-        </p>
+    <section className="flex flex-col gap-7">
+      <HomeHero
+        name={firstName}
+        isOwner={false}
+        weekTotal={ins.weekTotal}
+        weekDeltaPct={ins.weekDeltaPct}
+        weekGuaranteed={ins.weekGuaranteed}
+        monthTotal={ins.monthTotal}
+        streak={ins.streak}
+        weekLabel={businessWeekLabel(new Date())}
+        loading={ins.isLoading}
+      />
+
+      <div className="grid grid-cols-3 divide-x divide-rule rounded-[16px] border border-rule bg-card">
+        <StatTile label="Hoje" value={String(ins.today.total)} caption={`${ins.today.remaining} a atender`} />
+        <StatTile label="Concluídos" value={String(ins.today.done)} caption="hoje" accent="text-success" />
+        <StatTile label="A receber" value={formatBRLShort(ins.today.toReceive)} caption="hoje" accent="text-primary" />
       </div>
 
-      <ForecastCards forecast={forecast.data} loading={forecast.isLoading} />
+      {ins.goal && (
+        <Panel className="p-4">
+          <GoalBar
+            pct={ins.goal.pct}
+            current={ins.goal.current}
+            target={ins.goal.target}
+            type={ins.goal.type}
+          />
+        </Panel>
+      )}
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
-          Hoje
-        </h2>
-        <Card>
-          <CardContent className="p-0">
-            {today.length === 0 ? (
-              <p className="p-6 text-sm text-muted-foreground">
-                Nenhum atendimento hoje.
-              </p>
-            ) : (
-              <ul className="divide-y">
-                {today.map((a) => (
-                  <li key={a.id} className="flex items-center gap-3 p-4 text-sm">
-                    <span className="tnums w-12 font-medium">
-                      {timeLabel(a.scheduled_start)}
-                    </span>
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {a.client_name_snapshot ?? "—"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {a.service?.name}
-                      </p>
-                    </div>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_META[a.status].badge}`}
-                    >
-                      {STATUS_META[a.status].label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        <SectionLabel right={<SeeAll to="/pro/insights">Ver insights</SeeAll>}>
+          Sua semana
+        </SectionLabel>
+        <Panel className="p-4">
+          <WeekColumns data={ins.weekDays} formatValue={compactBRL} />
+        </Panel>
       </div>
+
+      <div>
+        <SectionLabel right={<SeeAll to="/pro/agenda">Ver agenda</SeeAll>}>
+          Próximos
+        </SectionLabel>
+        <Panel className="px-4">
+          <UpcomingList
+            appointments={ins.upcoming}
+            color={() => myPro.data?.color ?? "var(--primary)"}
+          />
+        </Panel>
+      </div>
+
+      <Link
+        to="/pro/insights"
+        className="flex items-center justify-center gap-2 rounded-[14px] border border-rule py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+      >
+        Ver todos os meus insights <ArrowRight className="h-4 w-4" />
+      </Link>
     </section>
   );
 }
