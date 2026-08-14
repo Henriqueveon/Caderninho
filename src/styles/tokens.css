@@ -51,7 +51,7 @@
 
   /* ---- TIPOGRAFIA ---- */
   --font: "Plus Jakarta Sans", "Inter", "Manrope", system-ui, sans-serif;
-  --font-display: "Fraunces", "Georgia", "Times New Roman", serif;
+
   --weight-title: 600;
   --weight-body: 400;
   --weight-btn: 500;

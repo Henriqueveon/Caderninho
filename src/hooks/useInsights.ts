@@ -1,12 +1,5 @@
 import { useMemo } from "react";
-import {
-  addDays,
-  format,
-  startOfMonth,
-  startOfWeek,
-  subDays,
-  subWeeks,
-} from "date-fns";
+import { addDays, format, startOfDay, startOfMonth, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,9 +8,14 @@ import { type EarningRow, useEarnings } from "@/hooks/useFinance";
 import { useGoals } from "@/hooks/useGoals";
 import { computeEarning } from "@/lib/earnings";
 import {
-  businessWeekDays,
-  businessWeekRange,
+  type Bucket,
+  DEFAULT_INSIGHTS_SELECTION,
+  type InsightsSelection,
+  insightsBuckets,
+  insightsLabel,
+  insightsRange,
   isSameDay,
+  shiftInsights,
 } from "@/lib/dates";
 
 export interface DayPoint {
@@ -42,12 +40,19 @@ export interface TeamPoint {
 export interface Insights {
   isLoading: boolean;
   metric: "commission" | "gross";
-  weekTotal: number;
-  weekDeltaPct: number | null;
-  weekGuaranteed: number; // já garantido: projeção dos agendados restantes da semana
+  /** Rótulo humano do período selecionado (ex.: "10–15 de agosto"). */
+  periodLabel: string;
+  /** Nome do período no comparativo (ex.: "semana passada", "mês anterior"). */
+  previousLabel: string;
+  total: number;
+  deltaPct: number | null;
+  /** Agendados que ainda vão acontecer dentro do período. */
+  guaranteed: number;
   monthTotal: number;
-  weekDays: DayPoint[];
-  weeklyTrend: DayPoint[];
+  /** Colunas do período: dias na semana/mês, meses em trimestre/ano. */
+  series: DayPoint[];
+  /** Os 8 períodos anteriores do mesmo tamanho (5 quando o período é o ano). */
+  trend: DayPoint[];
   byWeekday: DayPoint[];
   topServices: ServicePoint[];
   today: { total: number; done: number; remaining: number; toReceive: number };
@@ -66,30 +71,73 @@ export interface Insights {
 
 const ACTIVE = ["scheduled", "confirmed", "in_progress"] as const;
 const dayKey = (d: Date) => format(d, "yyyy-MM-dd");
+const WEEKDAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+const PREVIOUS_LABEL: Record<InsightsSelection["unit"], string> = {
+  week: "semana anterior",
+  month: "mês anterior",
+  quarter: "trimestre anterior",
+  year: "ano anterior",
+  custom: "período anterior",
+};
 
 /**
- * Métricas do painel, orientadas à SEMANA ÚTIL (seg–sáb) — que é como a equipe
- * revisa os ganhos. `professionalId` definido = visão da profissional (comissão);
+ * Métricas do painel para o período escolhido. O padrão é a SEMANA ÚTIL
+ * (seg–sáb) — que é como a equipe revisa os ganhos —, mas tudo aqui recalcula
+ * para qualquer recorte: mês, trimestre, ano ou intervalo livre.
+ *
+ * `professionalId` definido = visão da profissional (comissão);
  * indefinido = visão da gestora (faturamento do estúdio).
  */
-export function useInsights(professionalId?: string): Insights {
+export function useInsights(
+  professionalId?: string,
+  selection: InsightsSelection = DEFAULT_INSIGHTS_SELECTION,
+): Insights {
   const { profile } = useAuth();
   const isOwner = profile?.role === "owner";
   const metric: "commission" | "gross" = isOwner ? "gross" : "commission";
 
   const now = useMemo(() => new Date(), []);
-  // Cobre as 8 semanas da tendência E os 60 dias das métricas de hábito —
-  // o que for mais antigo, para nenhum recorte ficar com dados pela metade.
-  const wideRange = useMemo(() => {
-    const weekStart = startOfWeek(subWeeks(now, 7), { weekStartsOn: 1 });
-    const days60 = subDays(now, 60);
-    return { start: weekStart < days60 ? weekStart : days60, end: addDays(now, 1) };
-  }, [now]);
-  const histRange = useMemo(() => ({ start: subDays(now, 60), end: addDays(now, 1) }), [now]);
-  const aheadRange = useMemo(() => ({ start: now, end: addDays(now, 45) }), [now]);
+  const range = useMemo(() => insightsRange(selection), [selection]);
+  const buckets = useMemo(() => insightsBuckets(selection), [selection]);
 
-  const earnings = useEarnings(wideRange, professionalId);
-  const hist = useAppointments(histRange, professionalId);
+  // Janelas anteriores da tendência. Recortes longos puxam menos janelas —
+  // mais que isso é história antiga e uma query enorme à toa.
+  const trendWindows = useMemo(() => {
+    const windowDays = (+range.end - +range.start) / 86400000;
+    const count = selection.unit === "year" || windowDays > 120 ? 5 : 8;
+    const out: { sel: InsightsSelection; start: Date; end: Date }[] = [];
+    let sel = selection;
+    for (let i = 0; i < count; i++) {
+      const r = insightsRange(sel);
+      out.unshift({ sel, start: r.start, end: r.end });
+      sel = shiftInsights(sel, -1);
+    }
+    return out;
+  }, [selection, range.start, range.end]);
+
+  // Uma única busca cobre período + tendência + hoje.
+  const earningsRange = useMemo(() => {
+    const start = trendWindows[0].start;
+    const end = range.end > now ? range.end : addDays(now, 1);
+    return { start, end };
+  }, [trendWindows, range.end, now]);
+
+  const apptRange = useMemo(() => {
+    const today = startOfDay(now);
+    return {
+      start: range.start < today ? range.start : today,
+      end: range.end > now ? range.end : addDays(now, 1),
+    };
+  }, [range.start, range.end, now]);
+
+  const aheadRange = useMemo(() => {
+    const end = addDays(now, 45);
+    return { start: now, end: range.end > end ? range.end : end };
+  }, [now, range.end]);
+
+  const earnings = useEarnings(earningsRange, professionalId);
+  const hist = useAppointments(apptRange, professionalId);
   const ahead = useAppointments(aheadRange, professionalId);
   const pros = useProfessionals();
   const goals = useGoals(now);
@@ -97,49 +145,61 @@ export function useInsights(professionalId?: string): Insights {
   return useMemo(() => {
     const metricOf = (e: EarningRow) =>
       metric === "gross" ? Number(e.gross_value) : Number(e.commission_value);
+    const sumBetween = (rows: EarningRow[], start: Date, end: Date) =>
+      rows
+        .filter((e) => {
+          const t = new Date(e.earned_at);
+          return t >= start && t < end;
+        })
+        .reduce((s, e) => s + metricOf(e), 0);
 
-    const earns = earnings.data ?? [];
+    const allEarns = earnings.data ?? [];
     const histAppts = hist.data ?? [];
     const aheadAppts = ahead.data ?? [];
 
-    const since60 = subDays(now, 60);
-    const earns60 = earns.filter((e) => new Date(e.earned_at) >= since60);
+    // Tudo que é métrica do período olha só para esta fatia.
+    const earns = allEarns.filter((e) => {
+      const t = new Date(e.earned_at);
+      return t >= range.start && t < range.end;
+    });
+    const appts = histAppts.filter((a) => {
+      const t = new Date(a.scheduled_start);
+      return t >= range.start && t < range.end;
+    });
 
-    const week = businessWeekRange(now);
-    const lastWeekStart = subWeeks(week.start, 1);
+    const total = earns.reduce((s, e) => s + metricOf(e), 0);
     const monthStart = startOfMonth(now);
-    const todayNum = now.getDay();
-    // dia da semana útil já decorrido (seg=0 … sáb=5); domingo conta como semana cheia
-    const bizElapsed = todayNum === 0 ? 6 : todayNum; // seg=1..sáb=6
 
-    // ---- semana atual (seg–sáb) por dia ----
-    const weekDays: DayPoint[] = businessWeekDays(now).map((d) => ({
-      key: dayKey(d),
-      label: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][(d.getDay() + 6) % 7],
-      value: earns
-        .filter((e) => isSameDay(new Date(e.earned_at), d))
-        .reduce((s, e) => s + metricOf(e), 0),
-      isToday: isSameDay(d, now),
+    // ---- colunas do período ----
+    const series: DayPoint[] = buckets.map((b: Bucket) => ({
+      key: b.key,
+      label: b.label,
+      value: sumBetween(earns, b.start, b.end),
+      isToday: now >= b.start && now < b.end,
     }));
-    const weekTotal = weekDays.reduce((s, d) => s + d.value, 0);
 
-    // ---- semana passada, mesmo período decorrido (delta justo) ----
-    const lastWeekSame = earns
-      .filter((e) => {
-        const t = new Date(e.earned_at);
-        return t >= lastWeekStart && t < addDays(lastWeekStart, bizElapsed);
-      })
-      .reduce((s, e) => s + metricOf(e), 0);
-    const weekDeltaPct =
-      lastWeekSame > 0 ? ((weekTotal - lastWeekSame) / lastWeekSame) * 100 : null;
+    // ---- comparativo com o período anterior, no mesmo ponto decorrido ----
+    // Se o período ainda está correndo, compara só a parte equivalente — senão
+    // uma semana pela metade sempre pareceria queda.
+    const elapsed = Math.min(+now, +range.end) - +range.start;
+    const previous = trendWindows[trendWindows.length - 2];
+    const previousTotal = previous
+      ? sumBetween(
+          allEarns,
+          previous.start,
+          new Date(+previous.start + Math.max(0, elapsed)),
+        )
+      : 0;
+    const deltaPct =
+      previousTotal > 0 ? ((total - previousTotal) / previousTotal) * 100 : null;
 
-    // ---- já garantido: comissão/valor projetado dos agendados restantes da semana ----
-    const weekGuaranteed = aheadAppts
+    // ---- já garantido: agendados que ainda vão acontecer dentro do período ----
+    const guaranteed = aheadAppts
       .filter((a) => {
         const t = new Date(a.scheduled_start);
         return (
           t >= now &&
-          t < week.end &&
+          t < range.end &&
           (ACTIVE as readonly string[]).includes(a.status)
         );
       })
@@ -148,45 +208,30 @@ export function useInsights(professionalId?: string): Insights {
         return s + (metric === "gross" ? a.price_snapshot : c);
       }, 0);
 
-    // ---- mês corrente (número secundário) ----
-    const monthTotal = earns
-      .filter((e) => new Date(e.earned_at) >= monthStart)
-      .reduce((s, e) => s + metricOf(e), 0);
+    const monthTotal = sumBetween(allEarns, monthStart, addDays(now, 1));
 
-    // ---- tendência: últimas 8 semanas úteis ----
-    const weeklyTrend: DayPoint[] = [];
-    for (let i = 7; i >= 0; i--) {
-      const wStart = startOfWeek(subWeeks(now, i), { weekStartsOn: 1 });
-      const wEnd = addDays(wStart, 6);
-      const value = earns
-        .filter((e) => {
-          const t = new Date(e.earned_at);
-          return t >= wStart && t < wEnd;
-        })
-        .reduce((s, e) => s + metricOf(e), 0);
-      weeklyTrend.push({
-        key: dayKey(wStart),
-        label: format(wStart, "dd/MM", { locale: ptBR }),
-        value,
-        isToday: i === 0,
-      });
-    }
+    // ---- tendência: os períodos anteriores do mesmo tamanho ----
+    const trend: DayPoint[] = trendWindows.map((w, i) => ({
+      key: `${+w.start}`,
+      label: insightsLabel(w.sel),
+      value: sumBetween(allEarns, w.start, w.end),
+      isToday: i === trendWindows.length - 1,
+    }));
 
-    // ---- movimento por dia da semana (últimos 60 dias) ----
-    // Domingo (idx 6) entra no sábado? Não: o estúdio não abre domingo, então
-    // um lançamento de domingo é exceção e fica de fora deste recorte.
+    // ---- movimento por dia da semana, dentro do período ----
     const wdTotals = [0, 0, 0, 0, 0, 0]; // seg..sáb
-    for (const e of earns60) {
-      const d = new Date(e.earned_at);
-      const idx = (d.getDay() + 6) % 7; // seg=0..dom=6
-      if (idx < 6) wdTotals[idx] += metricOf(e);
+    for (const e of earns) {
+      const idx = (new Date(e.earned_at).getDay() + 6) % 7; // seg=0..dom=6
+      if (idx < 6) wdTotals[idx] += metricOf(e); // o estúdio não abre domingo
     }
-    const byWeekday: DayPoint[] = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
-      (label, i) => ({ key: label, label, value: wdTotals[i] }),
-    );
+    const byWeekday: DayPoint[] = WEEKDAYS.map((label, i) => ({
+      key: label,
+      label,
+      value: wdTotals[i],
+    }));
 
-    // ---- atendimentos concluídos (60d): serviços, comparecimento, clientes ----
-    const doneAppts = histAppts.filter((a) => a.status === "done");
+    // ---- atendimentos concluídos no período ----
+    const doneAppts = appts.filter((a) => a.status === "done");
     const svcMap = new Map<string, ServicePoint>();
     for (const a of doneAppts) {
       const items =
@@ -204,40 +249,39 @@ export function useInsights(professionalId?: string): Insights {
         svcMap.set(name, cur);
       }
     }
-    const topServices = [...svcMap.values()]
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 6);
+    const topServices = [...svcMap.values()].sort((a, b) => b.count - a.count).slice(0, 6);
 
     const doneCount = doneAppts.length;
-    const noShow = histAppts.filter((a) => a.status === "no_show").length;
+    const noShow = appts.filter((a) => a.status === "no_show").length;
     const attendanceRate =
       doneCount + noShow > 0 ? (doneCount / (doneCount + noShow)) * 100 : null;
     const clientsServed = new Set(
       doneAppts.map((a) => a.client_record_id ?? a.client_name_snapshot ?? a.id),
     ).size;
 
-    // ---- ticket médio (métrica por atendimento concluído, 60d) ----
-    const ticketMedio =
-      earns60.length > 0
-        ? earns60.reduce((s, e) => s + metricOf(e), 0) / earns60.length
-        : 0;
+    const ticketMedio = earns.length > 0 ? total / earns.length : 0;
 
-    // ---- melhor dia (60d) ----
+    // ---- melhor dia do período ----
     const perDay = new Map<string, number>();
-    for (const e of earns60) {
+    for (const e of earns) {
       const k = dayKey(new Date(e.earned_at));
       perDay.set(k, (perDay.get(k) ?? 0) + metricOf(e));
     }
     let bestDay: { label: string; value: number } | null = null;
     for (const [k, v] of perDay) {
       if (!bestDay || v > bestDay.value) {
-        bestDay = { label: format(new Date(k + "T12:00:00"), "dd/MM", { locale: ptBR }), value: v };
+        bestDay = {
+          label: format(new Date(`${k}T12:00:00`), "dd/MM", { locale: ptBR }),
+          value: v,
+        };
       }
     }
 
-    // ---- sequência (dias úteis seguidos com ≥1 concluído) ----
+    // ---- sequência de dias úteis com atendimento (sempre a partir de hoje) ----
     const doneDays = new Set(
-      doneAppts.map((a) => dayKey(new Date(a.scheduled_start))),
+      histAppts
+        .filter((a) => a.status === "done")
+        .map((a) => dayKey(new Date(a.scheduled_start))),
     );
     let streak = 0;
     for (let i = 0; i < 60; i++) {
@@ -247,7 +291,7 @@ export function useInsights(professionalId?: string): Insights {
       else if (i > 0) break; // hoje ainda sem atendimento não zera
     }
 
-    // ---- hoje ----
+    // ---- hoje (independe do período escolhido) ----
     const todayAppts = histAppts.filter((a) => isSameDay(new Date(a.scheduled_start), now));
     const todayDone = todayAppts.filter((a) => a.status === "done").length;
     const todayRemaining = todayAppts.filter((a) =>
@@ -258,16 +302,16 @@ export function useInsights(professionalId?: string): Insights {
       return s + (metric === "gross" ? a.price_snapshot : c);
     }, 0);
 
-    // ---- meta do mês (profissional) ----
+    // ---- meta do mês (profissional) — sempre mensal, por definição ----
     let goal: Insights["goal"] = null;
     if (professionalId) {
       const g = (goals.data ?? []).find((x) => x.professional_id === professionalId);
       if (g) {
-        const monthDone = earns.filter((e) => new Date(e.earned_at) >= monthStart);
+        const monthEarns = allEarns.filter((e) => new Date(e.earned_at) >= monthStart);
         const current =
           g.target_type === "appointments"
-            ? monthDone.length
-            : monthDone.reduce((s, e) => s + Number(e.gross_value), 0);
+            ? monthEarns.length
+            : monthEarns.reduce((s, e) => s + Number(e.gross_value), 0);
         goal = {
           type: g.target_type,
           target: Number(g.target_value),
@@ -277,18 +321,15 @@ export function useInsights(professionalId?: string): Insights {
       }
     }
 
-    // ---- equipe (gestora): ranking da semana ----
+    // ---- equipe (gestora): ranking do período ----
     let team: TeamPoint[] | null = null;
     if (isOwner) {
       const byPro = new Map<string, { value: number; count: number }>();
       for (const e of earns) {
-        const t = new Date(e.earned_at);
-        if (t >= week.start && t < week.end) {
-          const cur = byPro.get(e.professional_id) ?? { value: 0, count: 0 };
-          cur.value += metricOf(e);
-          cur.count += 1;
-          byPro.set(e.professional_id, cur);
-        }
+        const cur = byPro.get(e.professional_id) ?? { value: 0, count: 0 };
+        cur.value += metricOf(e);
+        cur.count += 1;
+        byPro.set(e.professional_id, cur);
       }
       team = (pros.data ?? [])
         .map((p) => ({
@@ -317,12 +358,14 @@ export function useInsights(professionalId?: string): Insights {
     return {
       isLoading: earnings.isLoading || hist.isLoading || ahead.isLoading,
       metric,
-      weekTotal,
-      weekDeltaPct,
-      weekGuaranteed,
+      periodLabel: insightsLabel(selection),
+      previousLabel: PREVIOUS_LABEL[selection.unit],
+      total,
+      deltaPct,
+      guaranteed,
       monthTotal,
-      weekDays,
-      weeklyTrend,
+      series,
+      trend,
       byWeekday,
       topServices,
       today: {
@@ -345,6 +388,10 @@ export function useInsights(professionalId?: string): Insights {
     metric,
     isOwner,
     professionalId,
+    selection,
+    range,
+    buckets,
+    trendWindows,
     now,
     earnings.data,
     earnings.isLoading,

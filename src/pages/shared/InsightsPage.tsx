@@ -1,12 +1,16 @@
+import { useState } from "react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+
 import { BarList } from "@/components/insights/BarList";
+import { ColumnChart } from "@/components/insights/ColumnChart";
 import { Panel } from "@/components/insights/Panel";
+import { PeriodPicker } from "@/components/insights/PeriodPicker";
 import { SectionLabel } from "@/components/insights/SectionLabel";
 import { StatTile } from "@/components/insights/StatTile";
-import { WeekColumns } from "@/components/insights/WeekColumns";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfessional } from "@/hooks/useAgenda";
 import { useInsights } from "@/hooks/useInsights";
-import { businessWeekLabel } from "@/lib/dates";
+import { type InsightsSelection } from "@/lib/dates";
 import { formatBRL } from "@/lib/format";
 
 const compactBRL = (n: number) =>
@@ -25,54 +29,90 @@ export function InsightsPage() {
   const { profile } = useAuth();
   const isOwner = profile?.role === "owner";
   const myPro = useMyProfessional();
-  const ins = useInsights(isOwner ? undefined : myPro.data?.id);
+  const [selection, setSelection] = useState<InsightsSelection>(() => ({
+    unit: "week",
+    anchor: new Date(),
+  }));
+  const ins = useInsights(isOwner ? undefined : myPro.data?.id, selection);
+
   const metricLabel = ins.metric === "gross" ? "faturamento" : "comissão";
   const wdMax = Math.max(...ins.byWeekday.map((d) => d.value), 0);
+  const up = (ins.deltaPct ?? 0) >= 0;
+  const seriesTitle =
+    selection.unit === "week"
+      ? isOwner
+        ? "Semana do estúdio"
+        : "Sua semana"
+      : "Movimento do período";
 
   return (
     <section className="flex flex-col gap-7">
       <div>
         <p className="kicker">{isOwner ? "Painel do estúdio" : "Seu desempenho"}</p>
         <h1 className="mt-1 text-3xl">Insights</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{businessWeekLabel(new Date())}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{ins.periodLabel}</p>
       </div>
+
+      <PeriodPicker value={selection} onChange={setSelection} />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Strip>
-          <StatTile label="Esta semana" value={formatBRL(ins.weekTotal)} caption={metricLabel} accent="text-primary" />
-          <StatTile label="Já garantido" value={formatBRL(ins.weekGuaranteed)} caption="a caminho" />
+          <StatTile
+            label="No período"
+            value={formatBRL(ins.total)}
+            caption={metricLabel}
+            accent="text-primary"
+          />
+          <StatTile label="Já garantido" value={formatBRL(ins.guaranteed)} caption="a caminho" />
         </Strip>
         <Strip>
           <StatTile label="Ticket médio" value={formatBRL(ins.ticketMedio)} caption="por atend." />
           <StatTile
             label="Comparecimento"
             value={ins.attendanceRate === null ? "—" : `${ins.attendanceRate.toFixed(0)}%`}
-            caption="60 dias"
+            caption="no período"
             accent="text-success"
           />
         </Strip>
       </div>
 
+      {ins.deltaPct !== null && (
+        <p className="-mt-3 flex items-center gap-1.5 text-sm">
+          {up ? (
+            <ArrowUpRight className="h-4 w-4 text-success" />
+          ) : (
+            <ArrowDownRight className="h-4 w-4 text-destructive" />
+          )}
+          <span className={`font-medium ${up ? "text-success" : "text-destructive"}`}>
+            {up ? "+" : ""}
+            {ins.deltaPct.toFixed(0)}%
+          </span>
+          <span className="text-muted-foreground">vs. {ins.previousLabel}</span>
+        </p>
+      )}
+
       <div>
-        <SectionLabel right={<span className="kicker">seg–sáb</span>}>
-          {isOwner ? "Semana do estúdio" : "Sua semana"}
+        <SectionLabel
+          right={<span className="kicker">{selection.unit === "week" ? "seg–sáb" : metricLabel}</span>}
+        >
+          {seriesTitle}
         </SectionLabel>
         <Panel className="p-4">
-          <WeekColumns data={ins.weekDays} formatValue={compactBRL} />
+          <ColumnChart data={ins.series} formatValue={compactBRL} label={seriesTitle} />
           <p className="mt-4 border-t border-rule pt-3 text-sm text-muted-foreground">
-            Total da semana{" "}
-            <span className="figure font-semibold text-foreground">{formatBRL(ins.weekTotal)}</span>
+            Total do período{" "}
+            <span className="figure font-semibold text-foreground">{formatBRL(ins.total)}</span>
           </p>
         </Panel>
       </div>
 
       <div>
         <SectionLabel right={<span className="kicker">{metricLabel}</span>}>
-          Últimas 8 semanas
+          Períodos anteriores
         </SectionLabel>
         <Panel className="p-4">
           <BarList
-            rows={ins.weeklyTrend.map((w) => ({
+            rows={ins.trend.map((w) => ({
               key: w.key,
               label: w.label,
               value: w.value,
@@ -84,7 +124,7 @@ export function InsightsPage() {
       </div>
 
       <div>
-        <SectionLabel right={<span className="kicker">60 dias</span>}>
+        <SectionLabel right={<span className="kicker">no período</span>}>
           Melhor dia da semana
         </SectionLabel>
         <Panel className="p-4">
@@ -101,7 +141,7 @@ export function InsightsPage() {
       </div>
 
       <div>
-        <SectionLabel right={<span className="kicker">60 dias</span>}>
+        <SectionLabel right={<span className="kicker">no período</span>}>
           Serviços mais feitos
         </SectionLabel>
         <Panel className="p-4">
@@ -113,14 +153,14 @@ export function InsightsPage() {
               caption: formatBRL(s.revenue),
             }))}
             formatValue={(n) => `${Math.round(n)}×`}
-            emptyLabel="Nenhum atendimento concluído ainda."
+            emptyLabel="Nenhum atendimento concluído neste período."
           />
         </Panel>
       </div>
 
       {isOwner && ins.team && (
         <div>
-          <SectionLabel right={<span className="kicker">nesta semana</span>}>
+          <SectionLabel right={<span className="kicker">no período</span>}>
             Ranking da equipe
           </SectionLabel>
           <Panel className="p-4">
@@ -140,7 +180,7 @@ export function InsightsPage() {
                 ),
               }))}
               formatValue={formatBRL}
-              emptyLabel="Sem atendimentos nesta semana ainda."
+              emptyLabel="Sem atendimentos neste período ainda."
             />
           </Panel>
         </div>
@@ -156,7 +196,7 @@ export function InsightsPage() {
         <StatTile
           label="Clientes atendidas"
           value={String(ins.clientsServed)}
-          caption="60 dias"
+          caption="no período"
         />
       </Strip>
     </section>

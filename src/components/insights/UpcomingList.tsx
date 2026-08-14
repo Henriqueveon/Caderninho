@@ -12,7 +12,7 @@ export function UpcomingList({
 }) {
   if (appointments.length === 0) {
     return (
-      <p className="py-8 text-center font-display text-sm italic text-muted-foreground">
+      <p className="py-8 text-center text-sm text-muted-foreground">
         Nenhum atendimento à frente — que tal preencher a agenda?
       </p>
     );
@@ -34,7 +34,7 @@ export function UpcomingList({
               <p className="truncate text-sm font-medium">
                 {a.client_name_snapshot ?? "—"}
               </p>
-              <p className="truncate font-display text-xs italic text-muted-foreground">
+              <p className="truncate text-xs text-muted-foreground">
                 {a.service?.name}
                 {(a.items?.length ?? 0) > 1 ? ` +${a.items!.length - 1}` : ""}
               </p>

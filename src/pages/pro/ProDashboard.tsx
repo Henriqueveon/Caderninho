@@ -7,11 +7,11 @@ import { Panel } from "@/components/insights/Panel";
 import { SectionLabel } from "@/components/insights/SectionLabel";
 import { StatTile } from "@/components/insights/StatTile";
 import { UpcomingList } from "@/components/insights/UpcomingList";
-import { WeekColumns } from "@/components/insights/WeekColumns";
+import { ColumnChart } from "@/components/insights/ColumnChart";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfessional } from "@/hooks/useAgenda";
 import { useInsights } from "@/hooks/useInsights";
-import { businessWeekLabel } from "@/lib/dates";
+
 import { formatBRLShort } from "@/lib/format";
 
 const compactBRL = (n: number) =>
@@ -39,12 +39,12 @@ export function ProDashboard() {
       <HomeHero
         name={firstName}
         isOwner={false}
-        weekTotal={ins.weekTotal}
-        weekDeltaPct={ins.weekDeltaPct}
-        weekGuaranteed={ins.weekGuaranteed}
+        total={ins.total}
+        deltaPct={ins.deltaPct}
+        guaranteed={ins.guaranteed}
         monthTotal={ins.monthTotal}
         streak={ins.streak}
-        weekLabel={businessWeekLabel(new Date())}
+        periodLabel={ins.periodLabel}
         loading={ins.isLoading}
       />
 
@@ -70,7 +70,7 @@ export function ProDashboard() {
           Sua semana
         </SectionLabel>
         <Panel className="p-4">
-          <WeekColumns data={ins.weekDays} formatValue={compactBRL} />
+          <ColumnChart data={ins.series} formatValue={compactBRL} label="Semana" />
         </Panel>
       </div>
 

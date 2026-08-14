@@ -29,10 +29,8 @@
   h2,
   h3,
   h4 {
-    font-family: var(--font-display);
-    font-optical-sizing: auto;
     font-weight: var(--weight-title);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.01em;
   }
 }
 
@@ -52,10 +50,8 @@
     color: var(--text-secondary);
   }
 
-  /* números editoriais (serifa + tabular + tamanho óptico) */
+  /* números do painel: alinhados em coluna (tabular), na fonte da interface */
   .figure {
-    font-family: var(--font-display);
-    font-optical-sizing: auto;
     font-variant-numeric: tabular-nums lining-nums;
   }
 

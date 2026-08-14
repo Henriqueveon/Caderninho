@@ -12,7 +12,6 @@ export default {
           "system-ui",
           "sans-serif",
         ],
-        display: ["Fraunces", "Georgia", "Times New Roman", "serif"],
       },
       colors: {
         // superfícies + texto (mapeadas para os design tokens)

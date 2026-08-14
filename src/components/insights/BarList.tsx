@@ -24,7 +24,7 @@ export function BarList({
   const max = Math.max(...rows.map((r) => r.value), 1);
   if (rows.length === 0 || rows.every((r) => r.value === 0)) {
     return (
-      <p className="py-6 text-center font-display text-sm italic text-muted-foreground">
+      <p className="py-6 text-center text-sm text-muted-foreground">
         {emptyLabel}
       </p>
     );

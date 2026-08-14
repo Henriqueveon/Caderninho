@@ -14,30 +14,30 @@ function greeting(name?: string) {
 
 /**
  * Herói do Início no estilo "razão de atelier": data em versalete, saudação em
- * itálico serifado, e o ganho da SEMANA em número editorial — sem gradiente.
+ * saudação discreta e o ganho da SEMANA em número grande — sem gradiente.
  */
 export function HomeHero({
   name,
   isOwner,
-  weekTotal,
-  weekDeltaPct,
-  weekGuaranteed,
+  total,
+  deltaPct,
+  guaranteed,
   monthTotal,
   streak,
-  weekLabel,
+  periodLabel,
   loading,
 }: {
   name?: string;
   isOwner: boolean;
-  weekTotal: number;
-  weekDeltaPct: number | null;
-  weekGuaranteed: number;
+  total: number;
+  deltaPct: number | null;
+  guaranteed: number;
   monthTotal: number;
   streak: number;
-  weekLabel: string;
+  periodLabel: string;
   loading: boolean;
 }) {
-  const up = (weekDeltaPct ?? 0) >= 0;
+  const up = (deltaPct ?? 0) >= 0;
   const dateKicker = format(new Date(), "EEEE · d 'de' MMMM", { locale: ptBR });
 
   return (
@@ -49,19 +49,19 @@ export function HomeHero({
       )}
 
       <p className="kicker">{dateKicker}</p>
-      <p className="mt-2 font-display text-lg italic text-muted-foreground">
+      <p className="mt-2 text-lg text-muted-foreground">
         {greeting(name)}
       </p>
 
       <p className="kicker mt-5">
         {isOwner ? "Faturamento desta semana" : "Você ganhou esta semana"}
       </p>
-      <p className="figure mt-1 text-[3.35rem] font-semibold leading-[1.05] tracking-[-0.02em]">
-        {loading ? "—" : <AnimatedNumber value={weekTotal} format={formatBRL} />}
+      <p className="figure mt-1 text-[2.9rem] font-semibold leading-[1.05] tracking-[-0.02em]">
+        {loading ? "—" : <AnimatedNumber value={total} format={formatBRL} />}
       </p>
 
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-        {weekDeltaPct !== null && (
+        {deltaPct !== null && (
           <span className="inline-flex items-center gap-1">
             {up ? (
               <ArrowUpRight className="h-4 w-4 text-success" />
@@ -70,7 +70,7 @@ export function HomeHero({
             )}
             <span className={`font-medium ${up ? "text-success" : "text-destructive"}`}>
               {up ? "+" : ""}
-              {weekDeltaPct.toFixed(0)}%
+              {deltaPct.toFixed(0)}%
             </span>
             <span className="text-muted-foreground">vs. semana passada</span>
           </span>
@@ -78,11 +78,11 @@ export function HomeHero({
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-1 border-t border-rule pt-3 text-sm text-muted-foreground">
-        {weekGuaranteed > 0 && (
+        {guaranteed > 0 && (
           <span>
             Já garantido{" "}
             <span className="figure font-medium text-foreground">
-              {formatBRL(weekGuaranteed)}
+              {formatBRL(guaranteed)}
             </span>
           </span>
         )}
@@ -92,7 +92,7 @@ export function HomeHero({
             {formatBRL(monthTotal)}
           </span>
         </span>
-        <span className="ml-auto">{weekLabel}</span>
+        <span className="ml-auto">{periodLabel}</span>
       </div>
     </div>
   );
