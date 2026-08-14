@@ -72,7 +72,10 @@ export function useSavePayment() {
         if (error) throw error;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["payments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["balances"] }); // o saldo acumulado muda junto
+    },
   });
 }
 
@@ -83,7 +86,10 @@ export function useDeletePayment() {
       const { error } = await supabase.from("payments").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["payments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["balances"] }); // o saldo acumulado muda junto
+    },
   });
 }
 

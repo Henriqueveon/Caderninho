@@ -2,8 +2,10 @@ import {
   Activity,
   Calendar,
   Clock,
+  Contact,
   Scissors,
   Target,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -23,6 +25,8 @@ import { ptBR } from "date-fns/locale";
 const CATEGORY_ICON: Record<ActivityCategory, LucideIcon> = {
   appointment: Calendar,
   service: Scissors,
+  client: Contact,
+  payment: Wallet,
   availability: Clock,
   goal: Target,
   other: Activity,
@@ -32,6 +36,8 @@ const FILTERS: { key: ActivityCategory | "all"; label: string }[] = [
   { key: "all", label: "Tudo" },
   { key: "appointment", label: "Atendimentos" },
   { key: "service", label: "Serviços" },
+  { key: "client", label: "Clientes" },
+  { key: "payment", label: "Pagamentos" },
   { key: "availability", label: "Horários" },
   { key: "goal", label: "Metas" },
 ];

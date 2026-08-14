@@ -38,7 +38,7 @@ import { InvitePage } from "@/pages/auth/InvitePage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
-import { EarningsPage } from "@/pages/pro/EarningsPage";
+import { ProFinancePage } from "@/pages/pro/FinancePage";
 import { ProDashboard } from "@/pages/pro/ProDashboard";
 
 const ADMIN_NAV: NavItem[] = [
@@ -59,7 +59,9 @@ const PRO_NAV: NavItem[] = [
   { to: "/pro/insights", label: "Insights", icon: Sparkles },
   { to: "/pro/agenda", label: "Agenda", icon: Calendar },
   { to: "/pro/disponibilidade", label: "Horários", icon: CalendarClock },
-  { to: "/pro/ganhos", label: "Ganhos", icon: Wallet },
+  { to: "/pro/clientes", label: "Clientes", icon: Contact },
+  { to: "/pro/servicos", label: "Serviços", icon: Scissors },
+  { to: "/pro/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/pro/historico", label: "Histórico", icon: History },
 ];
 
@@ -68,6 +70,7 @@ const SECRETARY_NAV: NavItem[] = [
   { to: "/secretaria/atendimentos", label: "Atendimentos", icon: ClipboardList },
   { to: "/secretaria/clientes", label: "Clientes", icon: Contact },
   { to: "/secretaria/disponibilidade", label: "Horários", icon: CalendarClock },
+  { to: "/secretaria/servicos", label: "Serviços", icon: Scissors },
 ];
 
 const CLIENT_NAV: NavItem[] = [
@@ -148,7 +151,11 @@ export default function App() {
             path="/pro/disponibilidade"
             element={<AvailabilityEditor scope="self" />}
           />
-          <Route path="/pro/ganhos" element={<EarningsPage />} />
+          <Route path="/pro/clientes" element={<ClientsPage />} />
+          <Route path="/pro/servicos" element={<ServicesPage />} />
+          <Route path="/pro/financeiro" element={<ProFinancePage />} />
+          {/* rota antiga: links e favoritos salvos continuam funcionando */}
+          <Route path="/pro/ganhos" element={<Navigate to="/pro/financeiro" replace />} />
           <Route path="/pro/historico" element={<HistoryPage scope="self" />} />
         </Route>
       </Route>
@@ -163,6 +170,7 @@ export default function App() {
           />
           <Route path="/secretaria/atendimentos" element={<AppointmentsPage />} />
           <Route path="/secretaria/clientes" element={<ClientsPage />} />
+          <Route path="/secretaria/servicos" element={<ServicesPage />} />
           <Route
             path="/secretaria/disponibilidade"
             element={<AvailabilityEditor scope="all" />}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProfessionals } from "@/hooks/useAgenda";
+import { useBalances } from "@/hooks/useBalance";
 import { useBonuses } from "@/hooks/useBonuses";
 import {
   KIND_LABEL,
@@ -33,6 +34,7 @@ export function PaymentsPanel({
   const professionals = useProfessionals();
   const payments = usePayments(range);
   const bonuses = useBonuses(anchor);
+  const balances = useBalances();
   const del = useDeletePayment();
 
   const [open, setOpen] = useState(false);
@@ -70,6 +72,9 @@ export function PaymentsPanel({
       earned,
       paid,
       saldo: earned - paid,
+      // O acumulado ignora o filtro de período de propósito: no dia de pagar,
+      // o que importa é o total em aberto, não o recorte que está na tela.
+      total: balances.data?.get(pro.id)?.saldo ?? 0,
     };
   });
 
@@ -130,7 +135,8 @@ export function PaymentsPanel({
                   <th className="p-4 font-medium">Profissional</th>
                   <th className="p-4 text-right font-medium">A receber</th>
                   <th className="p-4 text-right font-medium">Pago no período</th>
-                  <th className="p-4 text-right font-medium">Saldo</th>
+                  <th className="p-4 text-right font-medium">Saldo do período</th>
+                  <th className="p-4 text-right font-medium">Em aberto (total)</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,6 +162,17 @@ export function PaymentsPanel({
                     >
                       {formatBRL(r.saldo)}
                     </td>
+                    <td
+                      className={`tnums p-4 text-right font-semibold ${
+                        r.total > 0.005
+                          ? "text-warning"
+                          : r.total < -0.005
+                            ? "text-destructive"
+                            : "text-success"
+                      }`}
+                    >
+                      {formatBRL(r.total)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -164,8 +181,10 @@ export function PaymentsPanel({
         </CardContent>
       </Card>
       <p className="-mt-2 text-xs text-muted-foreground">
-        Saldo = comissão{period === "month" ? " + bônus" : ""} do período − pagamentos e vales.
-        Saldo positivo (âmbar) = a pagar; negativo (vermelho) = adiantado.
+        Saldo do período = comissão{period === "month" ? " + bônus" : ""} do período − o que
+        foi pago nele. <strong>Em aberto (total)</strong> é o acumulado desde o
+        início, sem filtro de data — é este que fecha a conta no dia do pagamento.
+        Âmbar = a pagar; vermelho = adiantado.
       </p>
 
       {/* Lançamentos */}

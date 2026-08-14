@@ -4,11 +4,14 @@ import { useState } from "react";
 import { ServiceSheet } from "@/components/services/ServiceSheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAllServices } from "@/hooks/useServiceAdmin";
 import { formatBRL, formatMinutes } from "@/lib/format";
 import type { Service } from "@/types/database";
 
 export function ServicesPage() {
+  const { profile } = useAuth();
+  const isOwner = profile?.role === "owner";
   const services = useAllServices();
   const [editing, setEditing] = useState<Service | null>(null);
   const [open, setOpen] = useState(false);
@@ -26,8 +29,9 @@ export function ServicesPage() {
         <div>
           <h1 className="text-2xl font-semibold">Serviços</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Catálogo do estúdio. O preço/duração aqui é o padrão — cada
-            profissional pode ter o seu, ajustável na aba Equipe.
+            {isOwner
+              ? "Catálogo do estúdio. O preço/duração aqui é o padrão — cada profissional pode ter o seu, ajustável na aba Equipe."
+              : "Catálogo do estúdio. Você pode criar e ajustar serviços — toda alteração fica registrada no Histórico com o seu nome."}
           </p>
         </div>
         <Button onClick={() => openSheet(null)}>

@@ -3,6 +3,8 @@ import { formatBRL } from "@/lib/format";
 export type ActivityCategory =
   | "appointment"
   | "service"
+  | "client"
+  | "payment"
   | "availability"
   | "goal"
   | "other";
@@ -26,6 +28,16 @@ function num(v: unknown): number | null {
   return v == null ? null : Number(v);
 }
 
+function money(v: unknown): string | undefined {
+  const n = num(v);
+  return n == null ? undefined : formatBRL(n);
+}
+
+/** "Vale" e "Pagamento" são coisas diferentes para a equipe — o log diz qual. */
+function kindTitle(row: Record<string, unknown>, verb: string): string {
+  return `${row.kind === "advance" ? "Vale" : "Pagamento"} ${verb}`;
+}
+
 /** Traduz uma linha do activity_log para algo legível. */
 export function describeActivity(log: RawLog): ActivityMeta {
   const meta = (log.metadata ?? {}) as Record<string, unknown>;
@@ -35,6 +47,7 @@ export function describeActivity(log: RawLog): ActivityMeta {
     | string
     | undefined;
   const serviceName = (nw.name ?? old.name) as string | undefined;
+  const fullName = (nw.full_name ?? old.full_name) as string | undefined;
 
   switch (log.action) {
     case "appointment.done":
@@ -70,6 +83,20 @@ export function describeActivity(log: RawLog): ActivityMeta {
     case "services.delete":
       return { title: "Serviço removido", detail: serviceName, category: "service", tone: "danger" };
 
+    case "clients.insert":
+      return { title: "Cliente cadastrada", detail: fullName, category: "client", tone: "info" };
+    case "clients.update":
+      return { title: "Cadastro de cliente alterado", detail: fullName, category: "client", tone: "info" };
+    case "clients.delete":
+      return { title: "Cliente removida", detail: fullName, category: "client", tone: "danger" };
+
+    case "payments.insert":
+      return { title: kindTitle(nw, "registrado"), detail: money(nw.amount), category: "payment", tone: "success" };
+    case "payments.update":
+      return { title: kindTitle(nw, "alterado"), detail: money(nw.amount), category: "payment", tone: "info" };
+    case "payments.delete":
+      return { title: kindTitle(old, "removido"), detail: money(old.amount), category: "payment", tone: "danger" };
+
     case "availability_rules.insert":
       return { title: "Horário recorrente adicionado", category: "availability", tone: "info" };
     case "availability_rules.delete":
@@ -101,6 +128,8 @@ export const TONE_DOT: Record<ActivityTone, string> = {
 export const CATEGORY_LABEL: Record<ActivityCategory, string> = {
   appointment: "Atendimentos",
   service: "Serviços",
+  client: "Clientes",
+  payment: "Pagamentos",
   availability: "Horários",
   goal: "Metas",
   other: "Outros",
