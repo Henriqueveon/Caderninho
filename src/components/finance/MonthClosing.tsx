@@ -146,7 +146,7 @@ export function MonthClosing({
                     <td className="tnums py-3 pr-4 text-right">
                       {formatBRL(r.commission)}
                     </td>
-                    <td className="tnums py-3 pr-4 text-right text-primary">
+                    <td className="tnums py-3 pr-4 text-right text-brand">
                       {r.bonus > 0 ? formatBRL(r.bonus) : "—"}
                     </td>
                     <td className="tnums py-3 pr-4 text-right font-semibold">
@@ -179,7 +179,7 @@ export function MonthClosing({
                   <td className="tnums py-3 pr-4 text-right">
                     {formatBRL(totalCommission)}
                   </td>
-                  <td className="tnums py-3 pr-4 text-right text-primary">
+                  <td className="tnums py-3 pr-4 text-right text-brand">
                     {formatBRL(totalBonus)}
                   </td>
                   <td className="tnums py-3 pr-4 text-right">

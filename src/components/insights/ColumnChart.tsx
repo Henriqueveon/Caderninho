@@ -67,7 +67,7 @@ export function ColumnChart({
         {data.map((d, i) => (
           <span
             key={d.key}
-            className={`kicker flex-1 truncate text-center ${d.isToday ? "text-primary" : ""}`}
+            className={`kicker flex-1 truncate text-center ${d.isToday ? "text-brand" : ""}`}
           >
             {i % labelEvery === 0 || d.isToday ? d.label : ""}
           </span>

@@ -61,7 +61,7 @@ export function InsightsPage() {
             label="No período"
             value={formatBRL(ins.total)}
             caption={metricLabel}
-            accent="text-primary"
+            accent="text-brand"
           />
           <StatTile label="Já garantido" value={formatBRL(ins.guaranteed)} caption="a caminho" />
         </Strip>

@@ -21,7 +21,7 @@ function SeeAll({ to, children }: { to: string; children: React.ReactNode }) {
   return (
     <Link
       to={to}
-      className="inline-flex items-center gap-0.5 text-[11px] font-medium text-primary"
+      className="inline-flex items-center gap-0.5 text-[11px] font-medium text-brand"
     >
       {children} <ArrowRight className="h-3 w-3" />
     </Link>
@@ -53,7 +53,7 @@ export function AdminDashboard() {
       <div className="grid grid-cols-3 divide-x divide-rule rounded-[16px] border border-rule bg-card">
         <StatTile label="Hoje" value={String(ins.today.total)} caption={`${ins.today.remaining} a atender`} />
         <StatTile label="Concluídos" value={String(ins.today.done)} caption="hoje" accent="text-success" />
-        <StatTile label="Entrando" value={formatBRLShort(ins.today.toReceive)} caption="hoje" accent="text-primary" />
+        <StatTile label="Entrando" value={formatBRLShort(ins.today.toReceive)} caption="hoje" accent="text-brand" />
       </div>
 
       <div>
@@ -101,7 +101,7 @@ export function AdminDashboard() {
 
       <Link
         to="/admin/insights"
-        className="flex items-center justify-center gap-2 rounded-[14px] border border-rule py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        className="flex items-center justify-center gap-2 rounded-[14px] border border-rule py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-brand"
       >
         Ver todos os insights do estúdio <ArrowRight className="h-4 w-4" />
       </Link>

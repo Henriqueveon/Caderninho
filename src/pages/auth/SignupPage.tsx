@@ -59,7 +59,7 @@ export function SignupPage() {
       <AuthLayout subtitle="Falta só um passo.">
         <div className="flex flex-col items-center gap-4 py-2 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary-tint)]">
-            <MailCheck className="h-7 w-7 text-primary" />
+            <MailCheck className="h-7 w-7 text-brand" />
           </span>
           <div>
             <h2 className="text-lg font-semibold">Confirme seu e-mail</h2>
@@ -72,7 +72,7 @@ export function SignupPage() {
           <Button onClick={() => setSent(false)} variant="outline">
             Voltar
           </Button>
-          <Link to="/login" className="text-sm font-medium text-primary hover:underline">
+          <Link to="/login" className="text-sm font-medium text-brand hover:underline">
             Ir para o login
           </Link>
         </div>
@@ -138,7 +138,7 @@ export function SignupPage() {
       </form>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         Já tem conta?{" "}
-        <Link to="/login" className="font-medium text-primary hover:underline">
+        <Link to="/login" className="font-medium text-brand hover:underline">
           Entrar
         </Link>
       </p>

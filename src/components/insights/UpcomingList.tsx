@@ -41,7 +41,7 @@ export function UpcomingList({
             </div>
             <span
               className={`shrink-0 text-[11px] font-medium ${
-                soon ? "text-primary" : "text-muted-foreground"
+                soon ? "text-brand" : "text-muted-foreground"
               }`}
             >
               {relativeTime(a.scheduled_start)}

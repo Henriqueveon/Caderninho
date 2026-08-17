@@ -1,13 +1,21 @@
 /* =========================================================
    CADERNINHO — Design tokens (fonte única da verdade)
    Trocar de tema = mudar só o bloco da cor primária.
+
+   REGRA DE COR: existem tokens de PREENCHIMENTO e tokens de TEXTO.
+   O rosé claro é lindo como fundo e péssimo como letra — usar `--primary`
+   para preencher e `--primary-text` para escrever. Todo par texto/fundo
+   daqui é verificado por `node scripts/check-contrast.mjs` (mínimo 4.5:1).
    ========================================================= */
 :root {
   /* ---- COR PRIMÁRIA (única coisa que muda entre temas) ---- */
-  --primary: #b76e79; /* Rose Gold */
+  --primary: #b76e79; /* Rose Gold — preenchimentos, barras, pontos */
   --primary-light: #d9a0a9; /* topo do gradiente */
   --primary-dark: #8e5560; /* base do gradiente */
-  --gradient-primary: linear-gradient(160deg, #d9a0a9 0%, #b76e79 55%, #8e5560 100%);
+  --primary-text: #8a5059; /* rosé profundo — quando o rosé vira LETRA */
+  /* Gradiente do botão: escurecido até o branco por cima passar em contraste.
+     De quebra ficou mais encorpado — tom lavado lê como template. */
+  --gradient-primary: linear-gradient(160deg, #a35c68 0%, #8e5560 55%, #74424c 100%);
   --primary-tint: rgba(183, 110, 121, 0.1); /* fundo suave (hover/seleção) */
   --primary-glow: rgba(183, 110, 121, 0.18); /* anel de foco */
 
@@ -18,22 +26,27 @@
 
   /* ---- TEXTO ---- */
   --text: #2d2a2e; /* carvão (nunca preto puro) */
-  --text-secondary: #8d8785; /* cinza quente */
+  --text-secondary: #6b6462; /* cinza quente — escurecido p/ passar 4.5:1 */
 
   /* ---- BORDAS ---- */
-  --border: #ece4e2; /* quase invisível */
-  --rule: #e5d9d4; /* linha-guia do "caderno" (um tom mais presente) */
+  --border: #ece4e2; /* quase invisível — separação decorativa */
+  --border-strong: #a1908a; /* contorno de CONTROLE (input, select) — 3:1 */
+  --rule: #e5d9d4; /* linha-guia do "caderno" */
   --rule-ink: rgba(45, 42, 46, 0.14); /* linha de ênfase (tinta) */
 
-  /* ---- FEEDBACK DE ESTADO ---- */
-  --success: #7a8450; /* verde oliva suave (concluído) */
-  --error: #c4715a; /* terracota (erro) */
-  --warning: #c9a46a; /* champagne dourado (aviso) */
+  /* ---- FEEDBACK DE ESTADO (valores de TEXTO; fundo usa /15) ---- */
+  --success: #5c6639; /* verde oliva profundo (concluído) */
+  --error: #a04a35; /* terracota queimada (erro) */
+  --warning: #85652c; /* dourado profundo (aviso) */
 
   /* ---- SOMBRAS (jamais pretas — sempre quentes e difusas) ---- */
-  --shadow-card: 0 10px 40px rgba(40, 25, 25, 0.08);
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.06);
-  --shadow-float: 0 16px 48px rgba(142, 85, 96, 0.14);
+  --shadow-card: 0 1px 2px rgba(74, 48, 52, 0.04), 0 10px 40px rgba(40, 25, 25, 0.07);
+  --shadow-soft: 0 1px 2px rgba(74, 48, 52, 0.04), 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-float: 0 2px 6px rgba(74, 48, 52, 0.06), 0 16px 48px rgba(142, 85, 96, 0.16);
+  /* Realce interno: a "luz de cima" do Soft UI — é o que dá volume sem
+     virar neumorfismo. Some no escuro, onde a luz vem de outro lugar. */
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --sheen-primary: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 
   /* ---- RAIOS ---- */
   --radius-input: 18px;
@@ -56,11 +69,17 @@
   --weight-body: 400;
   --weight-btn: 500;
 
-  /* ---- MOVIMENTO ---- */
-  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --dur-fast: 180ms;
-  --dur-base: 220ms;
-  --dur-slow: 300ms;
+  /* ---- MOVIMENTO ----
+     Duração escolhida por DISTÂNCIA, não uma só para tudo. E saída sempre
+     mais rápida que entrada: esperar algo sumir irrita, ver algo chegar não. */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1); /* chegando (desacelera) */
+  --ease-in: cubic-bezier(0.55, 0.06, 0.68, 0.19); /* saindo (acelera) */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* passa do ponto e volta */
+  --ease: var(--ease-out); /* compatibilidade */
+  --dur-instant: 90ms; /* cor de hover, feedback de toque */
+  --dur-fast: 160ms; /* saída, elementos pequenos */
+  --dur-base: 240ms; /* entrada padrão */
+  --dur-slow: 360ms; /* painel/sheet, distância grande */
 }
 
 /* ---- MODO ESCURO: identidade própria, não inversão ---- */
@@ -71,11 +90,31 @@
   --text: #f5f2f1;
   --text-secondary: #a39d9b;
   --border: #322f2f;
+  --border-strong: #736a66;
   --rule: #37332f;
   --rule-ink: rgba(245, 242, 241, 0.16);
+  /* No escuro o rosé precisa CLAREAR para virar letra legível. */
+  --primary-text: #e3b3ba;
+  --success: #a3b072;
+  --error: #e2937c;
+  --warning: #d8b273;
+  --gradient-primary: linear-gradient(160deg, #a05a63 0%, #8d4f59 55%, #74424c 100%);
   --primary-tint: rgba(217, 160, 169, 0.14);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --sheen-primary: inset 0 1px 0 rgba(255, 255, 255, 0.14);
   --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 10px 40px rgba(0, 0, 0, 0.35);
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-float: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* Quem pediu menos movimento recebe menos movimento — em tudo, não só nas
+   animações que eu lembrei de tratar. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 1ms;
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+  }
 }

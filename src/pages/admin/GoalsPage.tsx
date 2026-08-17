@@ -134,7 +134,7 @@ export function GoalsPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground">
                         Bônus{" "}
-                        <span className="font-medium text-primary">
+                        <span className="font-medium text-brand">
                           {bonusLabel}
                         </span>
                       </span>

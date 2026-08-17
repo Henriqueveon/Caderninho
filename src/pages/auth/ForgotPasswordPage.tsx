@@ -36,7 +36,7 @@ export function ForgotPasswordPage() {
       <AuthLayout subtitle="Recuperação de senha.">
         <div className="flex flex-col items-center gap-4 py-2 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary-tint)]">
-            <MailCheck className="h-7 w-7 text-primary" />
+            <MailCheck className="h-7 w-7 text-brand" />
           </span>
           <div>
             <h2 className="text-lg font-semibold">Verifique seu e-mail</h2>
@@ -46,7 +46,7 @@ export function ForgotPasswordPage() {
               enviamos um link para redefinir a senha.
             </p>
           </div>
-          <Link to="/login" className="text-sm font-medium text-primary hover:underline">
+          <Link to="/login" className="text-sm font-medium text-brand hover:underline">
             Voltar para o login
           </Link>
         </div>
@@ -84,7 +84,7 @@ export function ForgotPasswordPage() {
         </Button>
       </form>
       <p className="mt-5 text-center text-sm text-muted-foreground">
-        <Link to="/login" className="font-medium text-primary hover:underline">
+        <Link to="/login" className="font-medium text-brand hover:underline">
           Voltar para o login
         </Link>
       </p>

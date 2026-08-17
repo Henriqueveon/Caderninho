@@ -212,7 +212,7 @@ export function AppointmentsPage() {
         {canSeeRevenue && (
           <span>
             <span className="text-muted-foreground">concluídos somam </span>
-            <span className="tnums font-semibold text-primary">
+            <span className="tnums font-semibold text-brand">
               {formatBRL(doneValue)}
             </span>
           </span>

@@ -32,6 +32,26 @@
     font-weight: var(--weight-title);
     letter-spacing: -0.01em;
   }
+
+  /* Traço dos ícones: o Lucide vem com 2px, que é o "peso padrão da internet".
+     1.5px deixa o desenho mais fino e menos genérico, e casa com a espessura
+     da Plus Jakarta. Vale para todo ícone de uma vez — atributo de
+     apresentação perde para CSS, então não precisa tocar em cada componente. */
+  .lucide {
+    stroke-width: 1.5px;
+  }
+  /* Ícone pequeno precisa de traço um pouco maior, senão some. */
+  .lucide.h-3,
+  .lucide.h-3\.5 {
+    stroke-width: 1.75px;
+  }
+
+  /* Foco visível e consistente: anel rosé com folga, nunca `outline: none`. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 @layer utilities {

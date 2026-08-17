@@ -22,6 +22,9 @@ export default {
           DEFAULT: "var(--card)",
           foreground: "var(--text)",
         },
+        // `brand` = o rosé quando vira LETRA (escuro o bastante para ler).
+        // `primary` = o rosé quando vira PREENCHIMENTO (barra, ponto, fundo).
+        brand: "var(--primary-text)",
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "#ffffff",
@@ -48,7 +51,8 @@ export default {
         warning: "var(--warning)",
         border: "var(--border)",
         rule: "var(--rule)",
-        input: "var(--border)",
+        input: "var(--border-strong)",
+        "border-strong": "var(--border-strong)",
         ring: "var(--primary)",
       },
       borderRadius: {

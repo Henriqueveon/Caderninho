@@ -143,7 +143,7 @@ export function AppointmentSheet({
                 <span className="text-muted-foreground">
                   Comissão ({appointment.commission_pct_snapshot}%)
                 </span>
-                <span className="tnums font-medium text-primary">
+                <span className="tnums font-medium text-brand">
                   {formatBRL(earning.commission)}
                 </span>
               </div>

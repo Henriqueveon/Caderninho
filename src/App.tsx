@@ -92,7 +92,7 @@ function ComingSoon({ title }: { title: string }) {
       <h1 className="text-2xl font-semibold">{title}</h1>
       <div className="flex flex-col items-center gap-3 rounded-card bg-card p-12 text-center shadow-card">
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary-tint)]">
-          <Hourglass className="h-7 w-7 text-primary" />
+          <Hourglass className="h-7 w-7 text-brand" />
         </span>
         <p className="max-w-xs text-sm text-muted-foreground">
           Estamos preparando esta área — ela chega em breve.

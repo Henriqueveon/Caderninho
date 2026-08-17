@@ -36,7 +36,7 @@ export function PeriodStats({
   if (showRevenue) {
     items.push(
       { label: "Faturamento", value: formatBRL(revenue), tone: "text-foreground" },
-      { label: "Comissões", value: formatBRL(commission), tone: "text-primary" },
+      { label: "Comissões", value: formatBRL(commission), tone: "text-brand" },
     );
   }
 

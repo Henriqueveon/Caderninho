@@ -61,7 +61,7 @@ export function LoginPage() {
             <Label htmlFor="password">Senha</Label>
             <Link
               to="/esqueci-senha"
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-xs font-medium text-brand hover:underline"
             >
               Esqueci a senha
             </Link>
@@ -85,7 +85,7 @@ export function LoginPage() {
       </form>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         Cliente nova?{" "}
-        <Link to="/signup" className="font-medium text-primary hover:underline">
+        <Link to="/signup" className="font-medium text-brand hover:underline">
           Criar conta
         </Link>
       </p>

@@ -13,7 +13,7 @@ export function Seal({
       initial={{ opacity: 0, scale: 0.7, rotate: 4 }}
       animate={{ opacity: 1, scale: 1, rotate: -7 }}
       transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.3 }}
-      className="relative flex h-[62px] w-[62px] items-center justify-center rounded-full border border-primary/45 text-primary"
+      className="relative flex h-[62px] w-[62px] items-center justify-center rounded-full border border-primary/45 text-brand"
     >
       <span className="absolute inset-[3px] rounded-full border border-dashed border-primary/25" />
       <span className="text-center leading-none">

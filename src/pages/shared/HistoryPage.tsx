@@ -88,7 +88,7 @@ export function HistoryPage({ scope }: { scope: "all" | "self" }) {
             className={cn(
               "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
               filter === f.key
-                ? "bg-[var(--primary-tint)] text-primary"
+                ? "bg-[var(--primary-tint)] text-brand"
                 : "bg-secondary text-muted-foreground hover:text-foreground",
             )}
           >

@@ -127,7 +127,7 @@ export function ProfessionalsPage() {
 
                 <div className="flex items-center justify-between border-t pt-3 text-sm">
                   <span className="text-muted-foreground">Comissão</span>
-                  <span className="tnums font-semibold text-primary">
+                  <span className="tnums font-semibold text-brand">
                     {m.commission_pct}%
                   </span>
                 </div>

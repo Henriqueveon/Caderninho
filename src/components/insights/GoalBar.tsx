@@ -22,7 +22,7 @@ export function GoalBar({
     <div>
       <div className="flex items-baseline justify-between">
         <span className="kicker">Meta do mês</span>
-        <span className="figure text-sm font-semibold text-primary">
+        <span className="figure text-sm font-semibold text-brand">
           {Math.round(pct)}%
         </span>
       </div>

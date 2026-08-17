@@ -20,7 +20,7 @@ export function ForecastCards({
 
   const cards = [
     { label: "Realizado no mês", value: f.realizado, color: "text-success", bar: "var(--success)" },
-    { label: "Já garantido", value: f.agendado, color: "text-primary", bar: "var(--primary)" },
+    { label: "Já garantido", value: f.agendado, color: "text-brand", bar: "var(--primary)" },
     { label: "Potencial", value: f.potencial, color: "text-warning", bar: "var(--warning)" },
   ];
 

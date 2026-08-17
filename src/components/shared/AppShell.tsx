@@ -1,9 +1,11 @@
+import { AnimatePresence, motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { LogOut, Moon, Sun } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { Logo } from "@/components/brand/Logo";
 import { useAuth } from "@/contexts/AuthContext";
+import { pageVariants } from "@/lib/motion";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,7 @@ const ROLE_LABEL: Record<string, string> = {
 export function AppShell({ items }: { items: NavItem[] }) {
   const { profile, signOut } = useAuth();
   const { theme, toggle } = useTheme();
+  const location = useLocation();
 
   return (
     <div className="min-h-screen md:flex">
@@ -39,15 +42,28 @@ export function AppShell({ items }: { items: NavItem[] }) {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-all duration-200",
+                  "relative flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-colors duration-[var(--dur-instant)]",
                   isActive
-                    ? "bg-[var(--primary-tint)] text-primary"
+                    ? "text-brand"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                 )
               }
             >
-              <item.icon className="h-5 w-5" aria-hidden="true" />
-              {item.label}
+              {({ isActive }) => (
+                <>
+                  {/* A pílula ativa é UM elemento que se move entre os itens —
+                      dá continuidade espacial: você vê para onde foi. */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 rounded-2xl bg-[var(--primary-tint)]"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <item.icon className="relative h-5 w-5" aria-hidden="true" />
+                  <span className="relative">{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -104,7 +120,18 @@ export function AppShell({ items }: { items: NavItem[] }) {
       {/* Conteúdo */}
       <main className="flex-1 pb-24 md:pb-0">
         <div className="mx-auto max-w-5xl p-4 md:p-8">
-          <Outlet />
+          {/* mode="wait" para a tela nova não entrar por cima da antiga */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
 
@@ -120,13 +147,24 @@ export function AppShell({ items }: { items: NavItem[] }) {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex min-h-[52px] flex-1 shrink-0 basis-[64px] flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground",
+                "relative flex min-h-[52px] flex-1 shrink-0 basis-[64px] flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[10px] font-medium transition-colors",
+                isActive ? "text-brand" : "text-muted-foreground",
               )
             }
           >
-            <item.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <span className="max-w-full truncate px-0.5">{item.label}</span>
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-dash"
+                    className="absolute top-0 h-[3px] w-7 rounded-b-full bg-primary"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <item.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="max-w-full truncate px-0.5">{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>

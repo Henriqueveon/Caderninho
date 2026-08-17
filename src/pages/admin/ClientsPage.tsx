@@ -104,7 +104,7 @@ export function ClientsPage() {
                     <p className="text-[11px] text-muted-foreground">presença</p>
                   </div>
                   <div>
-                    <p className="tnums text-lg font-semibold text-primary">
+                    <p className="tnums text-lg font-semibold text-brand">
                       {c.upcoming}
                     </p>
                     <p className="text-[11px] text-muted-foreground">próximos</p>

@@ -60,7 +60,7 @@ export function ResetPasswordPage() {
           </p>
           <Link
             to="/esqueci-senha"
-            className="text-sm font-medium text-primary hover:underline"
+            className="text-sm font-medium text-brand hover:underline"
           >
             Pedir novo link
           </Link>

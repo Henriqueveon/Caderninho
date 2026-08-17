@@ -79,7 +79,7 @@ export function ProFinancePage() {
             label="Comissão"
             value={formatBRL(commissionInPeriod)}
             caption="no período"
-            accent="text-primary"
+            accent="text-brand"
           />
           <Tile label="Recebido" value={formatBRL(paidInPeriod)} caption="no período" />
         </div>
@@ -168,7 +168,7 @@ export function ProFinancePage() {
                           </p>
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="figure font-semibold text-primary">
+                          <p className="figure font-semibold text-brand">
                             {formatBRL(e.commission_value)}
                           </p>
                           <p className="text-xs text-muted-foreground">

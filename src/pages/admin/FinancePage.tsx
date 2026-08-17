@@ -58,7 +58,7 @@ export function FinancePage() {
 
   const kpis = [
     { label: "Faturamento", value: formatBRL(totals.gross), tone: "text-foreground" },
-    { label: "Comissões", value: formatBRL(totals.commission), tone: "text-primary" },
+    { label: "Comissões", value: formatBRL(totals.commission), tone: "text-brand" },
     { label: "Parte do estúdio", value: formatBRL(totals.studio), tone: "text-emerald-600" },
     { label: "Atendimentos", value: String(totals.count), tone: "text-foreground" },
   ];
@@ -225,7 +225,7 @@ export function FinancePage() {
                       </td>
                       <td className="tnums p-4 text-right">{r.count}</td>
                       <td className="tnums p-4 text-right">{formatBRL(r.gross)}</td>
-                      <td className="tnums p-4 text-right text-primary">
+                      <td className="tnums p-4 text-right text-brand">
                         {formatBRL(r.commission)}
                       </td>
                       <td className="tnums p-4 text-right">{formatBRL(r.studio)}</td>
@@ -239,7 +239,7 @@ export function FinancePage() {
                     <td className="p-4">Total</td>
                     <td className="tnums p-4 text-right">{totals.count}</td>
                     <td className="tnums p-4 text-right">{formatBRL(totals.gross)}</td>
-                    <td className="tnums p-4 text-right text-primary">
+                    <td className="tnums p-4 text-right text-brand">
                       {formatBRL(totals.commission)}
                     </td>
                     <td className="tnums p-4 text-right">{formatBRL(totals.studio)}</td>
