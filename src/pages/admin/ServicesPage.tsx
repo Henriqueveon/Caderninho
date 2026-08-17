@@ -3,8 +3,9 @@ import { useMemo, useState } from "react";
 
 import { ServiceSheet } from "@/components/services/ServiceSheet";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { SkeletonCards } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAllServices } from "@/hooks/useServiceAdmin";
 import { formatBRL, formatMinutes } from "@/lib/format";
@@ -69,20 +70,27 @@ export function ServicesPage() {
       </div>
 
       {services.isLoading ? (
-        <p className="text-sm text-muted-foreground">Carregando…</p>
+        <SkeletonCards count={6} />
       ) : shown === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm font-medium">
-              {query ? "Nenhum serviço com esse nome." : "Nenhum serviço ainda."}
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {query
-                ? "Tente outra busca ou limpe o campo."
-                : "Use “Novo serviço” para começar o catálogo."}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title={query ? "Nenhum serviço com esse nome." : "O catálogo está vazio."}
+          description={
+            query
+              ? "Tente outra busca ou limpe o campo."
+              : "Cadastre os serviços do estúdio para poder agendá-los."
+          }
+          action={
+            query ? (
+              <Button variant="secondary" onClick={() => setQuery("")}>
+                Limpar busca
+              </Button>
+            ) : (
+              <Button onClick={() => openSheet(null)}>
+                <Plus className="h-4 w-4" aria-hidden /> Novo serviço
+              </Button>
+            )
+          }
+        />
       ) : (
         groups.map(({ group, items }) => (
           <section key={group.key} aria-labelledby={`grp-${group.key}`}>

@@ -6,6 +6,7 @@ import { NewAppointmentDialog } from "@/components/agenda/NewAppointmentDialog";
 import { STATUS_META } from "@/components/agenda/status";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
@@ -223,7 +224,7 @@ export function AppointmentsPage() {
       <Card>
         <CardContent className="p-0">
           {appointments.isLoading ? (
-            <p className="p-6 text-sm text-muted-foreground">Carregando…</p>
+            <SkeletonList rows={6} />
           ) : rows.length === 0 ? (
             <p className="p-8 text-center text-sm text-muted-foreground">
               Nenhum atendimento com esses filtros.

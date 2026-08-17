@@ -6,6 +6,15 @@
     <meta name="description" content="Caderninho — gestão para estúdios de unhas" />
     <meta name="theme-color" content="#B76E79" />
     <title>Caderninho</title>
+    <script>
+      // Tema aplicado ANTES da primeira pintura. Sem isto, quem usa o tema
+      // escuro leva um flash branco na cara toda vez que abre o app, porque
+      // o JavaScript principal só decide o tema depois de carregar.
+      try {
+        var t = localStorage.getItem("caderninho-theme");
+        if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23D9A0A9'/%3E%3Cstop offset='0.55' stop-color='%23B76E79'/%3E%3Cstop offset='1' stop-color='%238E5560'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='40' height='40' rx='11' fill='url(%23g)'/%3E%3Cg stroke='%23FFFDFC' stroke-width='2.6' stroke-linecap='round'%3E%3Cline x1='15' y1='18' x2='30' y2='18'/%3E%3Cline x1='15' y1='24' x2='33' y2='24'/%3E%3Cline x1='15' y1='30' x2='27' y2='30'/%3E%3C/g%3E%3C/svg%3E"
@@ -18,7 +27,50 @@
     />
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Esqueleto de abertura, em HTML puro e estilo embutido: aparece assim
+         que o HTML chega, sem esperar CSS nem JavaScript. Numa conexão de
+         celular o pacote leva segundos, e sem isto a pessoa encara uma tela
+         BRANCA nesse intervalo. O React substitui tudo isto ao montar. -->
+    <div id="root">
+      <div style="min-height:100vh;display:flex;background:#fcfaf8" data-boot>
+        <div style="width:256px;flex-shrink:0;border-right:1px solid #ece4e2;background:rgba(255,253,252,.6);padding:20px" class="boot-side">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;padding:0 4px">
+            <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true">
+              <defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D9A0A9"/><stop offset=".55" stop-color="#B76E79"/><stop offset="1" stop-color="#8E5560"/></linearGradient></defs>
+              <rect x="4" y="4" width="40" height="40" rx="11" fill="url(#bg1)"/>
+              <g stroke="#FFFDFC" stroke-width="2.6" stroke-linecap="round">
+                <line x1="15" y1="18" x2="30" y2="18"/><line x1="15" y1="24" x2="33" y2="24"/><line x1="15" y1="30" x2="27" y2="30"/>
+              </g>
+            </svg>
+            <span style="font:600 18px/1 'Plus Jakarta Sans',system-ui,sans-serif;color:#2d2a2e">Caderninho</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;padding:0 14px">
+            <i style="display:block;height:14px;width:60%;border-radius:7px;background:#f2e9e6"></i>
+            <i style="display:block;height:14px;width:75%;border-radius:7px;background:#f2e9e6"></i>
+            <i style="display:block;height:14px;width:50%;border-radius:7px;background:#f2e9e6"></i>
+            <i style="display:block;height:14px;width:68%;border-radius:7px;background:#f2e9e6"></i>
+            <i style="display:block;height:14px;width:55%;border-radius:7px;background:#f2e9e6"></i>
+          </div>
+        </div>
+        <div style="flex:1;padding:32px">
+          <i style="display:block;height:12px;width:120px;border-radius:6px;background:#f2e9e6"></i>
+          <i style="display:block;height:30px;width:220px;border-radius:10px;background:#f2e9e6;margin-top:12px"></i>
+          <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap">
+            <i style="flex:1;min-width:180px;height:96px;border-radius:24px;background:#fffdfc;border:1px solid #ece4e2"></i>
+            <i style="flex:1;min-width:180px;height:96px;border-radius:24px;background:#fffdfc;border:1px solid #ece4e2"></i>
+            <i style="flex:1;min-width:180px;height:96px;border-radius:24px;background:#fffdfc;border:1px solid #ece4e2"></i>
+          </div>
+          <i style="display:block;height:220px;border-radius:24px;background:#fffdfc;border:1px solid #ece4e2;margin-top:12px"></i>
+        </div>
+      </div>
+    </div>
+    <style>
+      :root[data-theme="dark"] [data-boot] { background: #191818 !important; }
+      :root[data-theme="dark"] [data-boot] i { background: #2b2828 !important; border-color: #322f2f !important; }
+      :root[data-theme="dark"] [data-boot] span { color: #f5f2f1 !important; }
+      :root[data-theme="dark"] [data-boot] .boot-side { background: rgba(36,34,34,.6) !important; border-color: #322f2f !important; }
+      @media (max-width: 767px) { [data-boot] .boot-side { display: none !important; } }
+    </style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet } from "@/components/ui/sheet";
@@ -22,6 +23,7 @@ export function ServiceSheet({
   open: boolean;
   onClose: () => void;
 }) {
+  const toast = useToast();
   const save = useSaveService();
   const remove = useRemoveService();
   const isNew = !service;
@@ -74,6 +76,7 @@ export function ServiceSheet({
     };
     try {
       await save.mutateAsync(payload);
+      toast.success(service ? "Serviço atualizado." : "Serviço criado.");
       onClose();
     } catch (err) {
       setError((err as Error).message ?? "Não foi possível salvar.");
@@ -84,6 +87,7 @@ export function ServiceSheet({
     setRemoveError(null);
     try {
       await remove.mutateAsync(service!.id);
+      toast.success("Serviço excluído.");
       onClose();
     } catch (err) {
       setRemoveError((err as Error).message ?? "Não foi possível excluir.");

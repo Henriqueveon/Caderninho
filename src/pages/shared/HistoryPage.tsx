@@ -11,6 +11,7 @@ import {
 import { useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import {
   type ActivityCategory,
@@ -98,7 +99,7 @@ export function HistoryPage({ scope }: { scope: "all" | "self" }) {
       </div>
 
       {log.isLoading ? (
-        <p className="text-sm text-muted-foreground">Carregando…</p>
+        <SkeletonList rows={6} />
       ) : groups.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">

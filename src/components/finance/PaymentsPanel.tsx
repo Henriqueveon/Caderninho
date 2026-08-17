@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { useProfessionals } from "@/hooks/useAgenda";
 import { useBalances } from "@/hooks/useBalance";
 import { useBonuses } from "@/hooks/useBonuses";
@@ -210,7 +211,7 @@ export function PaymentsPanel({
       <Card>
         <CardContent className="p-0">
           {payments.isLoading ? (
-            <p className="p-6 text-sm text-muted-foreground">Carregando…</p>
+            <SkeletonList rows={6} />
           ) : (payments.data ?? []).length === 0 ? (
             <p className="p-8 text-center text-sm text-muted-foreground">
               Nenhum pagamento registrado neste período.

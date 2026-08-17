@@ -55,6 +55,16 @@ export default {
         "border-strong": "var(--border-strong)",
         ring: "var(--primary)",
       },
+      keyframes: {
+        // O brilho atravessa o bloco e sai — 1.6s é lento o bastante para não
+        // virar pisca-pisca e rápido o bastante para parecer vivo.
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.6s infinite",
+      },
       borderRadius: {
         button: "var(--radius-button)",
         card: "var(--radius-card)",

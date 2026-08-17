@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { useSaveStudio, useStudio } from "@/hooks/useStudio";
 
 export function SettingsPage() {
+  const toast = useToast();
   const studio = useStudio();
   const save = useSaveStudio();
 
@@ -18,7 +20,6 @@ export function SettingsPage() {
   const [openEnd, setOpenEnd] = useState("20:00");
   const [minCancel, setMinCancel] = useState("4");
   const [slotStep, setSlotStep] = useState("15");
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,7 +37,6 @@ export function SettingsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setSaved(false);
     if (openStart >= openEnd) {
       setError("O horário de abertura deve ser antes do fechamento.");
       return;
@@ -53,9 +53,11 @@ export function SettingsPage() {
           slot_step_minutes: Number(slotStep),
         },
       });
-      setSaved(true);
+      toast.success("Configurações salvas.");
     } catch (err) {
-      setError((err as Error).message ?? "Não foi possível salvar.");
+      const msg = (err as Error).message ?? "Não foi possível salvar.";
+      setError(msg);
+      toast.error(msg);
     }
   }
 
@@ -169,15 +171,12 @@ export function SettingsPage() {
             {error}
           </p>
         )}
-        <div className="flex items-center gap-3">
-          <Button type="submit" disabled={save.isPending}>
-            {save.isPending ? "Salvando…" : "Salvar configurações"}
+        {/* A confirmação virou toast — deixar as duas dizia a mesma coisa
+            duas vezes na mesma tela. */}
+        <div>
+          <Button type="submit" loading={save.isPending}>
+            Salvar configurações
           </Button>
-          {saved && (
-            <span className="text-sm font-medium text-success">
-              Salvo com sucesso.
-            </span>
-          )}
         </div>
       </form>
     </section>
