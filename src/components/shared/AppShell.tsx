@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
@@ -12,7 +11,9 @@ import { cn } from "@/lib/utils";
 export interface NavItem {
   to: string;
   label: string;
-  icon: LucideIcon;
+  /** Aceita tanto os ícones autorais quanto os do Lucide — os dois são
+   *  componentes SVG que recebem className. */
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const ROLE_LABEL: Record<string, string> = {

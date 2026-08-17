@@ -90,7 +90,7 @@ export function AvailabilityEditor({ scope }: { scope: "self" | "all" }) {
   if (scope === "all" && !professionalId) {
     return (
       <section className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Disponibilidade</h1>
+        <h1 className="text-title">Disponibilidade</h1>
         <Select value={selectedPro} onChange={(e) => setSelectedPro(e.target.value)}>
           <option value="">Escolha a profissional…</option>
           {(allPros.data ?? []).map((p) => (
@@ -107,7 +107,7 @@ export function AvailabilityEditor({ scope }: { scope: "self" | "all" }) {
     <section className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Disponibilidade</h1>
+          <h1 className="text-title">Disponibilidade</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Horários recorrentes e exceções pontuais.
           </p>

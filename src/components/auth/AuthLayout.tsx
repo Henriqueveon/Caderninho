@@ -17,7 +17,7 @@ export function AuthLayout({
       <div className="mb-6 flex flex-col items-center gap-3 text-center">
         <Logo size={52} withWordmark={false} />
         <div>
-          <h1 className="text-2xl font-semibold">Caderninho</h1>
+          <h1 className="text-title">Caderninho</h1>
           <p className="mt-1 max-w-xs text-sm text-muted-foreground">{subtitle}</p>
         </div>
       </div>

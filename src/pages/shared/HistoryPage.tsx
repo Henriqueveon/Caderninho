@@ -73,7 +73,7 @@ export function HistoryPage({ scope }: { scope: "all" | "self" }) {
   return (
     <section className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl font-semibold">Histórico</h1>
+        <h1 className="text-title">Histórico</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {scope === "self"
             ? "Suas ações no estúdio."

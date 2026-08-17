@@ -55,6 +55,17 @@ export default {
         "border-strong": "var(--border-strong)",
         ring: "var(--primary)",
       },
+      // Escala tipográfica do produto. Antes cada tela escolhia text-2xl ou
+      // text-3xl no olho; nomear os degraus é o que separa "usei Tailwind" de
+      // "tem sistema". Cada degrau já carrega entrelinha e espaçamento —
+      // título grande precisa de tracking negativo, texto pequeno de positivo.
+      fontSize: {
+        display: ["2.25rem", { lineHeight: "1.08", letterSpacing: "-0.025em", fontWeight: "600" }],
+        title: ["1.5rem", { lineHeight: "1.2", letterSpacing: "-0.018em", fontWeight: "600" }],
+        section: ["1.0625rem", { lineHeight: "1.35", letterSpacing: "-0.01em", fontWeight: "600" }],
+        body: ["0.9375rem", { lineHeight: "1.55" }],
+        caption: ["0.8125rem", { lineHeight: "1.45", letterSpacing: "0.005em" }],
+      },
       keyframes: {
         // O brilho atravessa o bloco e sai — 1.6s é lento o bastante para não
         // virar pisca-pisca e rápido o bastante para parecer vivo.

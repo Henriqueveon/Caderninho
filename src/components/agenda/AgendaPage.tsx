@@ -120,7 +120,7 @@ export function AgendaPage({ scope, showRevenue }: AgendaPageProps) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Agenda</h1>
+        <h1 className="text-title">Agenda</h1>
         <Button onClick={() => openNew(fixedProfessionalId)}>
           <Plus className="h-4 w-4" /> Novo atendimento
         </Button>

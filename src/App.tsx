@@ -1,28 +1,28 @@
-import {
-  BarChart3,
-  Calendar,
-  CalendarClock,
-  CalendarPlus,
-  ClipboardList,
-  Contact,
-  History,
-  Hourglass,
-  LayoutDashboard,
-  Scissors,
-  Settings,
-  Sparkles,
-  User,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { Hourglass } from "lucide-react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
+import {
+  IcAgenda,
+  IcAppointments,
+  IcBook,
+  IcClients,
+  IcFinance,
+  IcHistory,
+  IcHome,
+  IcInsights,
+  IcProfile,
+  IcSchedule,
+  IcServices,
+  IcSettings,
+  IcTeam,
+} from "@/components/icons";
 import { AppShell, type NavItem } from "@/components/shared/AppShell";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
 import { AgendaPage } from "@/components/agenda/AgendaPage";
 import { AvailabilityEditor } from "@/components/agenda/AvailabilityEditor";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { ClientHome } from "@/pages/app/ClientHome";
+import { IconLab } from "@/pages/dev/IconLab";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { ClientsPage } from "@/pages/admin/ClientsPage";
 import { FinancePage } from "@/pages/admin/FinancePage";
@@ -42,41 +42,41 @@ import { ProFinancePage } from "@/pages/pro/FinancePage";
 import { ProDashboard } from "@/pages/pro/ProDashboard";
 
 const ADMIN_NAV: NavItem[] = [
-  { to: "/admin/dashboard", label: "Início", icon: LayoutDashboard },
-  { to: "/admin/insights", label: "Insights", icon: Sparkles },
-  { to: "/admin/agenda", label: "Agenda", icon: Calendar },
-  { to: "/admin/atendimentos", label: "Atendimentos", icon: ClipboardList },
-  { to: "/admin/clientes", label: "Clientes", icon: Contact },
-  { to: "/admin/financeiro", label: "Financeiro", icon: BarChart3 },
-  { to: "/admin/profissionais", label: "Equipe", icon: Users },
-  { to: "/admin/servicos", label: "Serviços", icon: Scissors },
-  { to: "/admin/historico", label: "Histórico", icon: History },
-  { to: "/admin/configuracoes", label: "Ajustes", icon: Settings },
+  { to: "/admin/dashboard", label: "Início", icon: IcHome },
+  { to: "/admin/insights", label: "Insights", icon: IcInsights },
+  { to: "/admin/agenda", label: "Agenda", icon: IcAgenda },
+  { to: "/admin/atendimentos", label: "Atendimentos", icon: IcAppointments },
+  { to: "/admin/clientes", label: "Clientes", icon: IcClients },
+  { to: "/admin/financeiro", label: "Financeiro", icon: IcFinance },
+  { to: "/admin/profissionais", label: "Equipe", icon: IcTeam },
+  { to: "/admin/servicos", label: "Serviços", icon: IcServices },
+  { to: "/admin/historico", label: "Histórico", icon: IcHistory },
+  { to: "/admin/configuracoes", label: "Ajustes", icon: IcSettings },
 ];
 
 const PRO_NAV: NavItem[] = [
-  { to: "/pro/dashboard", label: "Início", icon: LayoutDashboard },
-  { to: "/pro/insights", label: "Insights", icon: Sparkles },
-  { to: "/pro/agenda", label: "Agenda", icon: Calendar },
-  { to: "/pro/disponibilidade", label: "Horários", icon: CalendarClock },
-  { to: "/pro/clientes", label: "Clientes", icon: Contact },
-  { to: "/pro/servicos", label: "Serviços", icon: Scissors },
-  { to: "/pro/financeiro", label: "Financeiro", icon: Wallet },
-  { to: "/pro/historico", label: "Histórico", icon: History },
+  { to: "/pro/dashboard", label: "Início", icon: IcHome },
+  { to: "/pro/insights", label: "Insights", icon: IcInsights },
+  { to: "/pro/agenda", label: "Agenda", icon: IcAgenda },
+  { to: "/pro/disponibilidade", label: "Horários", icon: IcSchedule },
+  { to: "/pro/clientes", label: "Clientes", icon: IcClients },
+  { to: "/pro/servicos", label: "Serviços", icon: IcServices },
+  { to: "/pro/financeiro", label: "Financeiro", icon: IcFinance },
+  { to: "/pro/historico", label: "Histórico", icon: IcHistory },
 ];
 
 const SECRETARY_NAV: NavItem[] = [
-  { to: "/secretaria/agenda", label: "Agenda", icon: Calendar },
-  { to: "/secretaria/atendimentos", label: "Atendimentos", icon: ClipboardList },
-  { to: "/secretaria/clientes", label: "Clientes", icon: Contact },
-  { to: "/secretaria/disponibilidade", label: "Horários", icon: CalendarClock },
-  { to: "/secretaria/servicos", label: "Serviços", icon: Scissors },
+  { to: "/secretaria/agenda", label: "Agenda", icon: IcAgenda },
+  { to: "/secretaria/atendimentos", label: "Atendimentos", icon: IcAppointments },
+  { to: "/secretaria/clientes", label: "Clientes", icon: IcClients },
+  { to: "/secretaria/disponibilidade", label: "Horários", icon: IcSchedule },
+  { to: "/secretaria/servicos", label: "Serviços", icon: IcServices },
 ];
 
 const CLIENT_NAV: NavItem[] = [
-  { to: "/app/agendar", label: "Agendar", icon: CalendarPlus },
-  { to: "/app/meus-horarios", label: "Horários", icon: Calendar },
-  { to: "/app/perfil", label: "Perfil", icon: User },
+  { to: "/app/agendar", label: "Agendar", icon: IcBook },
+  { to: "/app/meus-horarios", label: "Horários", icon: IcSchedule },
+  { to: "/app/perfil", label: "Perfil", icon: IcProfile },
 ];
 
 function RootRedirect() {
@@ -134,6 +134,7 @@ export default function App() {
           <Route path="/admin/servicos" element={<ServicesPage />} />
           <Route path="/admin/historico" element={<HistoryPage scope="all" />} />
           <Route path="/admin/configuracoes" element={<SettingsPage />} />
+          <Route path="/admin/_icones" element={<IconLab />} />
         </Route>
       </Route>
 

@@ -71,7 +71,7 @@ export function FinancePage() {
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Financeiro</h1>
+        <h1 className="text-title">Financeiro</h1>
         <div className="flex items-center gap-2">
           <div className="inline-flex rounded-xl bg-muted p-1">
             {(["relatorio", "pagamentos"] as const).map((v) => (

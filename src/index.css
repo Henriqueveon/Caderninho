@@ -18,6 +18,14 @@
 
   body {
     background: var(--bg);
+    /* Grão de papel. O produto se chama Caderninho e não tinha um traço
+       sequer de papel — superfície lisa demais é o que faz interface parecer
+       renderização, não objeto. É um SVG de ruído de ~200 bytes, desenhado
+       uma vez pelo navegador e fixo na viewport: custo de pintura, não de
+       rolagem. Fica em 3% no claro; no escuro o grão precisa ser mais
+       discreto ainda, senão vira chuvisco de TV. */
+    background-image: var(--paper);
+    background-attachment: fixed;
     color: var(--text);
     font-family: var(--font);
     font-weight: var(--weight-body);

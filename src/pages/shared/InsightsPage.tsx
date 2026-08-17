@@ -49,7 +49,7 @@ export function InsightsPage() {
     <section className="flex flex-col gap-7">
       <div>
         <p className="kicker">{isOwner ? "Painel do estúdio" : "Seu desempenho"}</p>
-        <h1 className="mt-1 text-3xl">Insights</h1>
+        <h1 className="mt-1 text-title">Insights</h1>
         <p className="mt-1 text-sm text-muted-foreground">{ins.periodLabel}</p>
       </div>
 

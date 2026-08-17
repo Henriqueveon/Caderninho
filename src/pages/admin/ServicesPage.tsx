@@ -42,7 +42,7 @@ export function ServicesPage() {
     <section className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Serviços</h1>
+          <h1 className="text-title">Serviços</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             {isOwner
               ? "Catálogo do estúdio. O preço/duração aqui é o padrão — cada profissional pode ter o seu, ajustável na aba Equipe."

@@ -48,6 +48,9 @@
   --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --sheen-primary: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 
+  /* ---- TEXTURA ---- */
+  --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E");
+
   /* ---- RAIOS ---- */
   --radius-input: 18px;
   --radius-card: 24px;
@@ -99,6 +102,7 @@
   --error: #e2937c;
   --warning: #d8b273;
   --gradient-primary: linear-gradient(160deg, #a05a63 0%, #8d4f59 55%, #74424c 100%);
+  --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
   --primary-tint: rgba(217, 160, 169, 0.14);
   --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --sheen-primary: inset 0 1px 0 rgba(255, 255, 255, 0.14);

@@ -119,7 +119,7 @@ export function AppointmentsPage() {
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Atendimentos</h1>
+          <h1 className="text-title">Atendimentos</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Histórico completo, com filtros.
           </p>

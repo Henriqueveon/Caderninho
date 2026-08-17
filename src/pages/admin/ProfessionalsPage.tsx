@@ -43,7 +43,7 @@ export function ProfessionalsPage() {
     <section className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Equipe</h1>
+          <h1 className="text-title">Equipe</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Parceiras do estúdio, comissões e serviços.
           </p>
