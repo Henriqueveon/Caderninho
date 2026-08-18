@@ -57,7 +57,7 @@ export function AppShell({ items }: { items: NavItem[] }) {
                   {isActive && (
                     <motion.span
                       layoutId="nav-pill"
-                      className="absolute inset-0 rounded-2xl bg-[var(--primary-tint)]"
+                      className="textured absolute inset-0 rounded-2xl border border-primary/20 bg-[var(--primary-tint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
                       transition={{ type: "spring", stiffness: 380, damping: 32 }}
                     />
                   )}
@@ -139,7 +139,7 @@ export function AppShell({ items }: { items: NavItem[] }) {
       {/* Barra inferior mobile */}
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-10 flex overflow-x-auto border-t border-border bg-card/90 px-1 py-1 backdrop-blur-md [&::-webkit-scrollbar]:hidden md:hidden"
+        className="textured fixed inset-x-0 bottom-0 z-10 flex overflow-x-auto border-t border-border bg-card/92 px-1.5 py-1.5 shadow-[0_-2px_10px_rgba(74,48,52,0.06),0_-12px_32px_rgba(74,48,52,0.06)] backdrop-blur-md [&::-webkit-scrollbar]:hidden md:hidden"
         style={{ scrollbarWidth: "none" }}
       >
         {items.map((item) => (
@@ -148,8 +148,15 @@ export function AppShell({ items }: { items: NavItem[] }) {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "relative flex min-h-[52px] flex-1 shrink-0 basis-[64px] flex-col items-center justify-center gap-1 rounded-2xl py-1.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-brand" : "text-muted-foreground",
+                // Cada aba é um azulejo: textura própria, borda de material e
+                // uma luz no topo. A ativa afunda um fio e fica com o tom da
+                // marca — o dedo sente onde está sem precisar ler.
+                "textured relative mx-0.5 flex min-h-[52px] flex-1 shrink-0 basis-[62px] flex-col items-center justify-center gap-1",
+                "rounded-2xl border py-1.5 text-[10px] font-medium",
+                "transition-[background-color,border-color,color,box-shadow] duration-[var(--dur-instant)]",
+                isActive
+                  ? "border-primary/25 bg-[var(--primary-tint)] text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_1px_2px_rgba(74,48,52,0.06)]"
+                  : "border-transparent text-muted-foreground",
               )
             }
           >

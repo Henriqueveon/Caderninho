@@ -20,8 +20,8 @@
   --primary-glow: rgba(183, 110, 121, 0.18); /* anel de foco */
 
   /* ---- SUPERFÍCIES (neutras, iguais em todos os temas) ---- */
-  --bg: #fcfaf8; /* fundo principal — creme acetinado */
-  --bg-secondary: #f7efec; /* fundo secundário — nude quente */
+  --bg: #f4e9e6; /* parede de reboco rosé — o fundo do fundo */
+  --bg-secondary: #f9f0ed; /* superfície intermediária */
   --card: #fffdfc; /* cards — branco quente */
 
   /* ---- TEXTO ---- */
@@ -40,15 +40,25 @@
   --warning: #85652c; /* dourado profundo (aviso) */
 
   /* ---- SOMBRAS (jamais pretas — sempre quentes e difusas) ---- */
-  --shadow-card: 0 1px 2px rgba(74, 48, 52, 0.04), 0 10px 40px rgba(40, 25, 25, 0.07);
-  --shadow-soft: 0 1px 2px rgba(74, 48, 52, 0.04), 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 1px 2px rgba(74, 48, 52, 0.06), 0 6px 16px rgba(74, 48, 52, 0.07),
+    0 18px 46px rgba(74, 48, 52, 0.09);
+  --shadow-soft: 0 1px 2px rgba(74, 48, 52, 0.06), 0 4px 14px rgba(74, 48, 52, 0.08);
   --shadow-float: 0 2px 6px rgba(74, 48, 52, 0.06), 0 16px 48px rgba(142, 85, 96, 0.16);
   /* Realce interno: a "luz de cima" do Soft UI — é o que dá volume sem
      virar neumorfismo. Some no escuro, onde a luz vem de outro lugar. */
   --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --sheen-primary: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 
-  /* ---- TEXTURA ---- */
+  /* ---- TEXTURA ----
+     A "parede" do fundo: manchas grandes de reboco + o grão fino por cima.
+     Feita por código (dois SVG de ~400 bytes no total) em vez de uma foto —
+     acompanha o tema, não pesa no carregamento e não pixeliza em tela retina.
+     A intensidade é baixa de propósito: o rosé forte da referência viraria
+     doce, e é sobre ela que ficam os textos secundários. Quem carrega a cor
+     é o --bg; a textura só quebra a superfície. */
+  --wall: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013 0.017' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23p)' opacity='0.09'/%3E%3C/svg%3E");
+
+
   --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E");
 
   /* ---- RAIOS ---- */
@@ -87,7 +97,7 @@
 
 /* ---- MODO ESCURO: identidade própria, não inversão ---- */
 :root[data-theme="dark"] {
-  --bg: #191818;
+  --bg: #1c1a1a;
   --bg-secondary: #201e1e;
   --card: #242222;
   --text: #f5f2f1;
@@ -103,6 +113,7 @@
   --warning: #d8b273;
   --gradient-primary: linear-gradient(160deg, #a05a63 0%, #8d4f59 55%, #74424c 100%);
   --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+  --wall: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013 0.017' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23p)' opacity='0.07'/%3E%3C/svg%3E");
   --primary-tint: rgba(217, 160, 169, 0.14);
   --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --sheen-primary: inset 0 1px 0 rgba(255, 255, 255, 0.14);

@@ -24,8 +24,11 @@
        uma vez pelo navegador e fixo na viewport: custo de pintura, não de
        rolagem. Fica em 3% no claro; no escuro o grão precisa ser mais
        discreto ainda, senão vira chuvisco de TV. */
-    background-image: var(--paper);
-    background-attachment: fixed;
+    /* Duas camadas: manchas grandes de reboco e, por cima, o grão fino.
+       `fixed` prende a parede à janela — o conteúdo desliza SOBRE ela, que é
+       o que dá a sensação de camadas em vez de papel de parede rolando. */
+    background-image: var(--paper), var(--wall);
+    background-attachment: fixed, fixed;
     color: var(--text);
     font-family: var(--font);
     font-weight: var(--weight-body);
@@ -81,6 +84,12 @@
   /* números do painel: alinhados em coluna (tabular), na fonte da interface */
   .figure {
     font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Superfície com o mesmo grão da parede — para peças que devem parecer
+     material, não vidro: a barra de abas e cada azulejo de ícone. */
+  .textured {
+    background-image: var(--paper);
   }
 
   /* gradiente primário (botões, marca) */
