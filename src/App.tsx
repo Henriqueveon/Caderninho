@@ -1,4 +1,5 @@
 import { Hourglass } from "lucide-react";
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
@@ -16,30 +17,38 @@ import {
   IcSettings,
   IcTeam,
 } from "@/components/icons";
+import { AppBoot } from "@/components/shared/AppBoot";
 import { AppShell, type NavItem } from "@/components/shared/AppShell";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
-import { AgendaPage } from "@/components/agenda/AgendaPage";
-import { AvailabilityEditor } from "@/components/agenda/AvailabilityEditor";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
-import { ClientHome } from "@/pages/app/ClientHome";
-import { IconLab } from "@/pages/dev/IconLab";
-import { AdminDashboard } from "@/pages/admin/AdminDashboard";
-import { ClientsPage } from "@/pages/admin/ClientsPage";
-import { FinancePage } from "@/pages/admin/FinancePage";
-import { GoalsPage } from "@/pages/admin/GoalsPage";
-import { ProfessionalsPage } from "@/pages/admin/ProfessionalsPage";
-import { ServicesPage } from "@/pages/admin/ServicesPage";
-import { SettingsPage } from "@/pages/admin/SettingsPage";
-import { AppointmentsPage } from "@/pages/shared/AppointmentsPage";
-import { HistoryPage } from "@/pages/shared/HistoryPage";
-import { InsightsPage } from "@/pages/shared/InsightsPage";
-import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
-import { InvitePage } from "@/pages/auth/InvitePage";
-import { LoginPage } from "@/pages/auth/LoginPage";
-import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
-import { SignupPage } from "@/pages/auth/SignupPage";
-import { ProFinancePage } from "@/pages/pro/FinancePage";
-import { ProDashboard } from "@/pages/pro/ProDashboard";
+
+/**
+ * Cada tela é carregada só quando alguém abre.
+ *
+ * Antes tudo vinha num pacote único de 1 MB — a Kimberly baixava o gráfico
+ * do Financeiro da gestora (que ela nem acessa) antes de ver a agenda dela.
+ * Como as telas só entram pela navegação, o pedaço chega junto com o clique.
+ */
+const AgendaPage = lazy(() => import("@/components/agenda/AgendaPage").then((m) => ({ default: m.AgendaPage })));
+const AvailabilityEditor = lazy(() => import("@/components/agenda/AvailabilityEditor").then((m) => ({ default: m.AvailabilityEditor })));
+const ClientHome = lazy(() => import("@/pages/app/ClientHome").then((m) => ({ default: m.ClientHome })));
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
+const ClientsPage = lazy(() => import("@/pages/admin/ClientsPage").then((m) => ({ default: m.ClientsPage })));
+const FinancePage = lazy(() => import("@/pages/admin/FinancePage").then((m) => ({ default: m.FinancePage })));
+const GoalsPage = lazy(() => import("@/pages/admin/GoalsPage").then((m) => ({ default: m.GoalsPage })));
+const ProfessionalsPage = lazy(() => import("@/pages/admin/ProfessionalsPage").then((m) => ({ default: m.ProfessionalsPage })));
+const ServicesPage = lazy(() => import("@/pages/admin/ServicesPage").then((m) => ({ default: m.ServicesPage })));
+const SettingsPage = lazy(() => import("@/pages/admin/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const AppointmentsPage = lazy(() => import("@/pages/shared/AppointmentsPage").then((m) => ({ default: m.AppointmentsPage })));
+const HistoryPage = lazy(() => import("@/pages/shared/HistoryPage").then((m) => ({ default: m.HistoryPage })));
+const InsightsPage = lazy(() => import("@/pages/shared/InsightsPage").then((m) => ({ default: m.InsightsPage })));
+const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage })));
+const InvitePage = lazy(() => import("@/pages/auth/InvitePage").then((m) => ({ default: m.InvitePage })));
+const LoginPage = lazy(() => import("@/pages/auth/LoginPage").then((m) => ({ default: m.LoginPage })));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage })));
+const SignupPage = lazy(() => import("@/pages/auth/SignupPage").then((m) => ({ default: m.SignupPage })));
+const ProFinancePage = lazy(() => import("@/pages/pro/FinancePage").then((m) => ({ default: m.ProFinancePage })));
+const ProDashboard = lazy(() => import("@/pages/pro/ProDashboard").then((m) => ({ default: m.ProDashboard })));
 
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Início", icon: IcHome },
@@ -104,7 +113,8 @@ function ComingSoon({ title }: { title: string }) {
 
 export default function App() {
   return (
-    <Routes>
+    <Suspense fallback={<AppBoot />}>
+      <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
@@ -134,7 +144,6 @@ export default function App() {
           <Route path="/admin/servicos" element={<ServicesPage />} />
           <Route path="/admin/historico" element={<HistoryPage scope="all" />} />
           <Route path="/admin/configuracoes" element={<SettingsPage />} />
-          <Route path="/admin/_icones" element={<IconLab />} />
         </Route>
       </Route>
 
@@ -190,6 +199,7 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

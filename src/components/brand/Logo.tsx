@@ -57,19 +57,26 @@ export function Logo({
     return <LogoMark size={size} className={className} />;
   }
 
+  // As duas versões ficam no DOM para o CSS escolher, mas como IMAGEM DE
+  // FUNDO, não como <img>: o navegador baixa <img display:none> mesmo assim,
+  // e desse jeito toda visita puxava as duas artes (178 kB) em vez de uma.
+  // Fundo de elemento escondido não é baixado.
+  const caixa = { height: size, aspectRatio: `${822 / 200}` };
   return (
-    <div className={cn("flex items-center", className)}>
-      <img
-        src={logoClaroUrl}
-        alt="Caderninho"
-        className="w-auto dark-hidden"
-        style={{ height: size }}
+    <div
+      className={cn("flex items-center", className)}
+      role="img"
+      aria-label="Caderninho"
+    >
+      <span
+        aria-hidden
+        className="dark-hidden block bg-contain bg-left bg-no-repeat"
+        style={{ ...caixa, backgroundImage: `url(${logoClaroUrl})` }}
       />
-      <img
-        src={logoEscuroUrl}
-        alt="Caderninho"
-        className="light-hidden w-auto"
-        style={{ height: size }}
+      <span
+        aria-hidden
+        className="light-hidden block bg-contain bg-left bg-no-repeat"
+        style={{ ...caixa, backgroundImage: `url(${logoEscuroUrl})` }}
       />
     </div>
   );

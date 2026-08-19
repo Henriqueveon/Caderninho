@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { Suspense } from "react";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { Logo } from "@/components/brand/Logo";
 import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 import { pageVariants } from "@/lib/motion";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,24 @@ const ROLE_LABEL: Record<string, string> = {
   secretary: "Secretária",
   client: "Cliente",
 };
+
+/** Espera do conteúdo: mesma forma de sempre — cabeçalho, fichas, painel. */
+function ConteudoCarregando() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="mt-2.5 h-7 w-48" />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 rounded-card" />
+        ))}
+      </div>
+      <Skeleton className="h-56 rounded-card" />
+    </div>
+  );
+}
 
 export function AppShell({ items }: { items: NavItem[] }) {
   const { profile, signOut } = useAuth();
@@ -130,7 +150,13 @@ export function AppShell({ items }: { items: NavItem[] }) {
               animate="animate"
               exit="exit"
             >
-              <Outlet />
+              {/* Fronteira própria: com as telas carregadas sob demanda, sem
+                  isto o Suspense de cima trocaria o app inteiro pelo esqueleto
+                  de abertura a cada clique no menu. Aqui só o conteúdo espera —
+                  o menu e a marca ficam de pé. */}
+              <Suspense fallback={<ConteudoCarregando />}>
+                <Outlet />
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </div>
