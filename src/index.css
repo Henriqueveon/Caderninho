@@ -86,6 +86,33 @@
     font-variant-numeric: tabular-nums lining-nums;
   }
 
+  /* Troca de peça por tema, sem JavaScript: as duas versões ficam no DOM e
+     o CSS esconde a errada. Evita piscar a marca de fundo claro em quem usa
+     o tema escuro enquanto o app decide o tema. */
+  /* Visível só para leitor de tela — o nome existe no desenho da marca, mas
+     a página precisa de um <h1> real na árvore de acessibilidade. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .light-hidden {
+    display: none;
+  }
+  :root[data-theme="dark"] .light-hidden {
+    display: block;
+  }
+  :root[data-theme="dark"] .dark-hidden {
+    display: none;
+  }
+
   /* Superfície com o mesmo grão da parede — para peças que devem parecer
      material, não vidro: a barra de abas e cada azulejo de ícone. */
   .textured {

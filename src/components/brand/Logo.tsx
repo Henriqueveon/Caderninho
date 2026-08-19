@@ -1,63 +1,44 @@
+import marcaUrl from "@/assets/logo/caderninho-marca.png";
+import logoClaroUrl from "@/assets/logo/caderninho-claro.png";
+import logoEscuroUrl from "@/assets/logo/caderninho-escuro.png";
 import { cn } from "@/lib/utils";
 
-/** Marca do Caderninho: caderno + pincel de esmalte com gota, em rose gold. */
+/**
+ * Marca oficial do Caderninho.
+ *
+ * Os arquivos vêm da arte enviada pela gestora e ficam em `src/assets/logo/`.
+ * O que existia antes era uma recriação em SVG, feita antes de haver marca —
+ * ela nunca bateu com a original e saiu de cena.
+ *
+ * Três arquivos, todos recortados na caixa exata do desenho (sem margem morta)
+ * e com fundo transparente, para assentarem sobre a parede texturizada:
+ *   caderninho-claro.png   lockup completo, palavra em preto — fundo claro
+ *   caderninho-escuro.png  o mesmo com a palavra em creme — fundo escuro
+ *   caderninho-marca.png   só o caderno com o pincel — espaços apertados
+ *
+ * A troca claro/escuro é feita por CSS (as duas imagens ficam no DOM e uma
+ * some), e não por JavaScript: assim a marca certa já aparece na primeira
+ * pintura, sem piscar a versão errada enquanto o tema é decidido.
+ */
+
+/** Só o símbolo — para o quadrado do login e espaços estreitos. */
 export function LogoMark({
   size = 40,
-  id = "cad-grad",
+  className,
 }: {
   size?: number;
-  id?: string;
+  className?: string;
 }) {
   return (
-    <svg
+    <img
+      src={marcaUrl}
+      alt=""
+      aria-hidden="true"
       width={size}
       height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--primary-light)" />
-          <stop offset="0.55" stopColor="var(--primary)" />
-          <stop offset="1" stopColor="var(--primary-dark)" />
-        </linearGradient>
-      </defs>
-
-      {/* caderno */}
-      <path
-        d="M13 8h12a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H13a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4Z"
-        fill={`url(#${id})`}
-      />
-      {/* linhas de anotação */}
-      <g stroke="var(--card)" strokeWidth="2.2" strokeLinecap="round">
-        <line x1="14.5" y1="16.5" x2="22.5" y2="16.5" />
-        <line x1="14.5" y1="22" x2="24.5" y2="22" />
-        <line x1="14.5" y1="27.5" x2="20.5" y2="27.5" />
-      </g>
-
-      {/* pincel — cabo diagonal */}
-      <g transform="rotate(40 31 13)">
-        <rect
-          x="28.4"
-          y="3"
-          width="5.2"
-          height="13"
-          rx="2.6"
-          fill={`url(#${id})`}
-          stroke="var(--card)"
-          strokeWidth="0.8"
-        />
-        <rect x="28.4" y="15" width="5.2" height="4.2" rx="1" fill="var(--primary-dark)" />
-      </g>
-      {/* gota de esmalte */}
-      <path
-        d="M28.9 28.2c0-2.6 2.6-4.1 2.6-6.7 0 2.6 2.6 4.1 2.6 6.7a2.6 2.6 0 0 1-5.2 0Z"
-        fill={`url(#${id})`}
-        stroke="var(--card)"
-        strokeWidth="0.8"
-      />
-    </svg>
+      className={cn("object-contain", className)}
+      style={{ height: size, width: "auto" }}
+    />
   );
 }
 
@@ -66,21 +47,30 @@ export function Logo({
   withWordmark = true,
   className,
 }: {
+  /** Altura em pixels — vale para o símbolo sozinho e para o lockup.
+   *  A largura sempre acompanha a proporção do arquivo. */
   size?: number;
   withWordmark?: boolean;
   className?: string;
 }) {
+  if (!withWordmark) {
+    return <LogoMark size={size} className={className} />;
+  }
+
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <LogoMark size={size} />
-      {withWordmark && (
-        <span
-          className="text-xl font-semibold tracking-tight text-foreground"
-          style={{ fontWeight: 600 }}
-        >
-          Caderninho
-        </span>
-      )}
+    <div className={cn("flex items-center", className)}>
+      <img
+        src={logoClaroUrl}
+        alt="Caderninho"
+        className="w-auto dark-hidden"
+        style={{ height: size }}
+      />
+      <img
+        src={logoEscuroUrl}
+        alt="Caderninho"
+        className="light-hidden w-auto"
+        style={{ height: size }}
+      />
     </div>
   );
 }

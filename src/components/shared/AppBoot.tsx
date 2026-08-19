@@ -18,7 +18,7 @@ export function AppBoot() {
       {/* Coluna lateral (desktop) */}
       <div className="hidden w-64 shrink-0 flex-col border-r border-border bg-card/60 p-5 md:flex">
         <div className="mb-8 px-1">
-          <Logo size={34} />
+          <Logo size={38} />
         </div>
         <div className="flex flex-col gap-1.5">
           {Array.from({ length: 7 }).map((_, i) => (
@@ -32,7 +32,7 @@ export function AppBoot() {
 
       {/* Topo (celular) */}
       <div className="flex items-center justify-between border-b border-border bg-card/60 px-4 py-3 md:hidden">
-        <Logo size={30} />
+        <Logo size={32} />
         <Skeleton className="h-9 w-9 rounded-full" />
       </div>
 

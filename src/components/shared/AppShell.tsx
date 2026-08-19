@@ -33,7 +33,7 @@ export function AppShell({ items }: { items: NavItem[] }) {
       {/* Sidebar desktop */}
       <header className="hidden w-64 shrink-0 flex-col border-r border-border bg-card/60 p-5 md:flex">
         <div className="mb-8 px-1">
-          <Logo size={34} />
+          <Logo size={38} />
         </div>
 
         <nav aria-label="Principal" className="flex flex-1 flex-col gap-1.5">
@@ -104,7 +104,7 @@ export function AppShell({ items }: { items: NavItem[] }) {
 
       {/* Topbar mobile */}
       <div className="flex items-center justify-between border-b border-border bg-card/60 px-4 py-3 md:hidden">
-        <Logo size={30} />
+        <Logo size={32} />
         <button
           onClick={toggle}
           aria-label="Alternar tema"
