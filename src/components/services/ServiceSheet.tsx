@@ -36,8 +36,9 @@ function CustomPricesNotice({ service }: { service: Service }) {
     >
       <p className="font-medium text-brand">Preços próprios neste serviço</p>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        Estas profissionais não usam o valor do catálogo. Mudar o preço aqui
-        não altera o delas — ajuste na aba Equipe.
+        Estas profissionais têm um valor diferente do catálogo. Ao salvar um
+        novo preço ou duração aqui, o valor próprio delas é apagado e todas
+        passam a seguir o catálogo.
       </p>
       <ul className="mt-2 flex flex-col gap-1 text-xs">
         {custom.map((o) => (
