@@ -6,12 +6,53 @@ import { useToast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet } from "@/components/ui/sheet";
+import { useProfessionals } from "@/hooks/useAgenda";
 import {
   type ServiceInput,
   useRemoveService,
   useSaveService,
 } from "@/hooks/useServiceAdmin";
+import { useServiceOverrides } from "@/hooks/useTeam";
+import { formatBRL, formatMinutes } from "@/lib/format";
 import type { Service } from "@/types/database";
+
+/** Profissionais cujo preço/duração neste serviço NÃO segue o catálogo. */
+function CustomPricesNotice({ service }: { service: Service }) {
+  const overrides = useServiceOverrides(service.id);
+  const professionals = useProfessionals();
+  const names = new Map((professionals.data ?? []).map((p) => [p.id, p.full_name]));
+
+  const custom = (overrides.data ?? []).filter(
+    (o) =>
+      (o.price != null && o.price !== service.price) ||
+      (o.durationMinutes != null && o.durationMinutes !== service.duration_minutes),
+  );
+  if (custom.length === 0) return null;
+
+  return (
+    <div
+      role="note"
+      className="rounded-xl border border-[var(--primary)]/30 bg-[var(--primary-tint)] p-3 text-sm"
+    >
+      <p className="font-medium text-brand">Preços próprios neste serviço</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        Estas profissionais não usam o valor do catálogo. Mudar o preço aqui
+        não altera o delas — ajuste na aba Equipe.
+      </p>
+      <ul className="mt-2 flex flex-col gap-1 text-xs">
+        {custom.map((o) => (
+          <li key={o.professionalId} className="flex justify-between gap-3">
+            <span>{names.get(o.professionalId) ?? "Profissional"}</span>
+            <span className="figure text-muted-foreground">
+              {formatBRL(o.price ?? service.price)} ·{" "}
+              {formatMinutes(o.durationMinutes ?? service.duration_minutes)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 /** service = null → novo serviço. */
 export function ServiceSheet({
@@ -139,6 +180,8 @@ export function ServiceSheet({
             />
           </div>
         </div>
+
+        {service && <CustomPricesNotice service={service} />}
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="sover">Comissão específica (%)</Label>

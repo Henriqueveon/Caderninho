@@ -25,10 +25,24 @@ const SWATCHES = [
   "#A855F7",
 ];
 
+/** Campo vazio = segue o valor do catálogo (não grava override). */
 interface SvcRow {
   checked: boolean;
   price: string;
   duration: string;
+}
+
+const EMPTY_ROW: SvcRow = { checked: false, price: "", duration: "" };
+
+/**
+ * Converte o campo em override: vazio ou igual ao catálogo vira null, para
+ * que reajustes feitos na aba Serviços cheguem ao agendamento. Antes, o
+ * valor do catálogo era copiado para cada profissional e congelava ali.
+ */
+function toOverride(raw: string, catalog: number): number | null {
+  if (raw.trim() === "") return null;
+  const n = Number(raw);
+  return n === catalog ? null : n;
 }
 
 export function ProfessionalSheet({
@@ -79,8 +93,8 @@ export function ProfessionalSheet({
       const o = ov.find((x) => x.serviceId === s.id);
       map.set(s.id, {
         checked: !!o,
-        price: String(o?.price ?? s.price),
-        duration: String(o?.durationMinutes ?? s.duration_minutes),
+        price: o?.price != null ? String(o.price) : "",
+        duration: o?.durationMinutes != null ? String(o.durationMinutes) : "",
       });
     }
     setSvc(map);
@@ -106,11 +120,14 @@ export function ProfessionalSheet({
     }
     const chosen = [...svc.entries()].filter(([, r]) => r.checked);
     for (const [, r] of chosen) {
-      if (Number(r.price) < 0 || Number(r.duration) <= 0) {
+      const badPrice = r.price !== "" && !(Number(r.price) >= 0);
+      const badDuration = r.duration !== "" && !(Number(r.duration) > 0);
+      if (badPrice || badDuration) {
         setError("Preço e duração dos serviços devem ser válidos.");
         return;
       }
     }
+    const catalog = new Map(services.map((s) => [s.id, s]));
     try {
       await save.mutateAsync({
         professionalId: member!.professional_id,
@@ -121,11 +138,14 @@ export function ProfessionalSheet({
         color,
         bio: bio.trim() || null,
         active,
-        services: chosen.map(([serviceId, r]) => ({
-          serviceId,
-          price: r.price === "" ? null : Number(r.price),
-          durationMinutes: r.duration === "" ? null : Number(r.duration),
-        })),
+        services: chosen.map(([serviceId, r]) => {
+          const s = catalog.get(serviceId)!;
+          return {
+            serviceId,
+            price: toOverride(r.price, s.price),
+            durationMinutes: toOverride(r.duration, s.duration_minutes),
+          };
+        }),
       });
       onClose();
     } catch (err) {
@@ -219,15 +239,16 @@ export function ProfessionalSheet({
         <div className="flex flex-col gap-2">
           <Label>Serviços, preços e durações</Label>
           <p className="text-xs text-muted-foreground">
-            Marque os serviços que ela faz e ajuste o preço e a duração dela.
+            Marque os serviços que ela faz. Deixe preço e duração em branco
+            para seguir o catálogo (inclusive reajustes futuros); preencha só
+            quando o valor dela for diferente.
           </p>
           <div className="flex flex-col gap-1 rounded-xl border p-2">
             {services.map((s) => {
-              const row = svc.get(s.id) ?? {
-                checked: false,
-                price: String(s.price),
-                duration: String(s.duration_minutes),
-              };
+              const row = svc.get(s.id) ?? EMPTY_ROW;
+              const hasCustomPrice = row.price !== "" && Number(row.price) !== s.price;
+              const hasCustomDuration =
+                row.duration !== "" && Number(row.duration) !== s.duration_minutes;
               return (
                 <div
                   key={s.id}
@@ -240,7 +261,14 @@ export function ProfessionalSheet({
                       checked={row.checked}
                       onChange={(e) => setRow(s.id, { checked: e.target.checked })}
                     />
-                    <span className="min-w-[120px] flex-1">{s.name}</span>
+                    <span className="min-w-[120px] flex-1">
+                      {s.name}
+                      {row.checked && (hasCustomPrice || hasCustomDuration) && (
+                        <span className="ml-2 whitespace-nowrap rounded-full bg-[var(--primary-tint)] px-2 py-0.5 text-[11px] font-medium text-brand">
+                          Personalizado
+                        </span>
+                      )}
+                    </span>
                   </label>
                   {row.checked && (
                     <div className="flex items-center gap-1.5">
@@ -250,7 +278,8 @@ export function ProfessionalSheet({
                           type="number"
                           min={0}
                           step={5}
-                          aria-label={`Preço ${s.name}`}
+                          aria-label={`Preço ${s.name} (em branco segue o catálogo, R$ ${s.price})`}
+                          placeholder={String(s.price)}
                           value={row.price}
                           onChange={(e) => setRow(s.id, { price: e.target.value })}
                           className="h-9 w-[72px] px-2"
@@ -261,7 +290,8 @@ export function ProfessionalSheet({
                           type="number"
                           min={5}
                           step={5}
-                          aria-label={`Duração ${s.name}`}
+                          aria-label={`Duração ${s.name} (em branco segue o catálogo, ${s.duration_minutes} min)`}
+                          placeholder={String(s.duration_minutes)}
                           value={row.duration}
                           onChange={(e) =>
                             setRow(s.id, { duration: e.target.value })

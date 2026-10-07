@@ -67,6 +67,32 @@ export function useProfessionalServices(professionalId: string | undefined) {
   });
 }
 
+export interface ServiceOverrideByProfessional {
+  professionalId: string;
+  price: number | null;
+  durationMinutes: number | null;
+}
+
+/** Quem tem preço/duração próprios para um serviço (toda a equipe pode ler). */
+export function useServiceOverrides(serviceId: string | undefined) {
+  return useQuery({
+    queryKey: ["service-overrides", serviceId],
+    enabled: !!serviceId,
+    queryFn: async (): Promise<ServiceOverrideByProfessional[]> => {
+      const { data, error } = await supabase
+        .from("professional_services")
+        .select("professional_id, price, duration_minutes")
+        .eq("service_id", serviceId!);
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        professionalId: r.professional_id as string,
+        price: r.price as number | null,
+        durationMinutes: r.duration_minutes as number | null,
+      }));
+    },
+  });
+}
+
 export function useSaveProfessional() {
   const qc = useQueryClient();
   return useMutation({
@@ -111,6 +137,7 @@ export function useSaveProfessional() {
       qc.invalidateQueries({ queryKey: ["team"] });
       qc.invalidateQueries({ queryKey: ["professionals"] });
       qc.invalidateQueries({ queryKey: ["professional-services"] });
+      qc.invalidateQueries({ queryKey: ["service-overrides"] });
     },
   });
 }
